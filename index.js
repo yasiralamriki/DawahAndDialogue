@@ -1,7 +1,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const dotenv = require('dotenv');
-const { Client, Collection, Events, GatewayIntentBits, MessageFlags } = require('discord.js');
+const { Client, Collection, GatewayIntentBits } = require('discord.js');
 
 // Load environment variables from .env file
 dotenv.config();
