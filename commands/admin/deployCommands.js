@@ -55,7 +55,7 @@ module.exports = {
 
                 await interaction.editReply(`Started refreshing ${commands.length} application (/) commands. This may take a few seconds...`);
 
-                if (global === 'true') {
+                if (global === true) {
                     // If the user selected 'true', deploy commands globally
                     route = Routes.applicationCommands(clientId);
                 } else {
