@@ -13,7 +13,12 @@ module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('deploycommands')
 		.setDescription('Deploys the bot commands to the server.')
-        .setDefaultMemberPermissions(0),
+        .setDefaultMemberPermissions(0)
+        .addBooleanOption(option =>
+			option.setName('global')
+				.setDescription('Deploy commands globally or to the test server.')
+				.setRequired(true)
+		),
 	async execute(interaction) {
         await interaction.deferReply({ ephemeral: true });
 		const commands = [];
@@ -44,11 +49,23 @@ module.exports = {
         // and deploy your commands!
         (async () => {
             try {
+                const global = interaction.options.getBoolean('global');
+
+                let route;
+
                 await interaction.editReply(`Started refreshing ${commands.length} application (/) commands. This may take a few seconds...`);
-        
+
+                if (global === 'true') {
+                    // If the user selected 'true', deploy commands globally
+                    route = Routes.applicationCommands(clientId);
+                } else {
+                    // If the user selected 'false', deploy commands to the test server
+                    route = Routes.applicationGuildCommands(clientId, guildId);
+                }
+                
                 // The put method is used to fully refresh all commands in the guild with the current set
                 const data = await rest.put(
-                    Routes.applicationGuildCommands(clientId, guildId),
+                    route,
                     { body: commands },
                 );
                 
