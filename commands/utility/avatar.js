@@ -1,4 +1,11 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+/*
+	Name: avatar.js
+	Description: Command to get the avatar of a user
+	Author: Salafi Bot Team
+	License: MIT
+*/
+
+const { SlashCommandBuilder, EmbedBuilder } = require('discord.js'); // Import necessary classes from discord.js
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -26,9 +33,10 @@ module.exports = {
             )
         ),
 	async execute(interaction) {
-        const user = interaction.options.getUser('user') || interaction.user;
-        const imageSize = interaction.options.getInteger('size') || 512;
+        const user = interaction.options.getUser('user') || interaction.user; // Get the user from the interaction options, or default to the command invoker
+        const imageSize = interaction.options.getInteger('size') || 512; // Get the image size from the interaction options, or default to 512
 
+        // Create an embed with the user's avatar
         const avatarEmbed = new EmbedBuilder()
             .setColor(0x0099FF)
             .setTitle(`Avatar of ${user.username}`)
@@ -36,6 +44,7 @@ module.exports = {
             .setTimestamp()
             .setFooter({ text: 'Salafi Bot', iconURL: interaction.client.user.displayAvatarURL() });
 
+        // Reply to the interaction with the embed
 		await interaction.reply( { embeds: [avatarEmbed] });
 	},
 };

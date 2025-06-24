@@ -1,4 +1,11 @@
-const { SlashCommandBuilder, REST, Routes } = require('discord.js');
+/*
+	Name: deployCommands.js
+	Description: Command to deploy the bot commands to the server
+	Author: Salafi Bot Team
+	License: MIT
+*/
+
+const { SlashCommandBuilder, REST, Routes } = require('discord.js'); // Import necessary classes from discord.js
 const fs = require('node:fs');
 const path = require('node:path');
 const dotenv = require('dotenv');
@@ -20,18 +27,22 @@ module.exports = {
 				.setRequired(true)
 		),
 	async execute(interaction) {
-        await interaction.deferReply({ ephemeral: true });
-		const commands = [];
+        await interaction.deferReply({ ephemeral: true }); // Defer the reply to allow time for command processing
+		const commands = []; // Create an array to hold the command data
         // Grab all the command folders from the commands directory you created earlier
         const foldersPath = path.join(__dirname, '..', '..', 'commands');
         const commandFolders = fs.readdirSync(foldersPath);
         
+        // Loop through each folder in the commands directory
         for (const folder of commandFolders) {
             // Grab all the command files from the commands directory you created earlier
-            const commandsPath = path.join(foldersPath, folder);
+            const commandsPath = path.join(foldersPath, folder); 
             const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
             // Grab the SlashCommandBuilder#toJSON() output of each command's data for deployment
             for (const file of commandFiles) {
+                // Import the command file
+                // Ensure the file is a valid command file by checking for 'data' and 'execute' properties
+                if (!file.endsWith('.js')) continue; // Skip non-JS files
                 const filePath = path.join(commandsPath, file);
                 const command = require(filePath);
                 if ('data' in command && 'execute' in command) {
@@ -49,12 +60,12 @@ module.exports = {
         // and deploy your commands!
         (async () => {
             try {
-                const global = interaction.options.getBoolean('global');
+                const global = interaction.options.getBoolean('global'); // Get the value of the 'global' option from the interaction
+                let route; // Declare a variable to hold the route for deploying commands
 
-                let route;
+                await interaction.editReply(`Started refreshing ${commands.length} application (/) commands. This may take a few seconds...`); 
 
-                await interaction.editReply(`Started refreshing ${commands.length} application (/) commands. This may take a few seconds...`);
-
+                // Determine the route based on the user's choice of global or test server deployment
                 if (global === true) {
                     // If the user selected 'true', deploy commands globally
                     route = Routes.applicationCommands(clientId);
