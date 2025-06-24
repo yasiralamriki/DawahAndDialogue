@@ -8,14 +8,31 @@ module.exports = {
             option.setName('user')
             .setDescription('The user to get the avatar of')
             .setRequired(false)
+        )
+        .addIntegerOption(option =>
+            option.setName('size')
+            .setDescription('The size of the avatar (default is 512)')
+            .setRequired(false)
+            .addChoices(
+                { name: '16', value: 16 },
+                { name: '32', value: 32 },
+                { name: '64', value: 64 },
+                { name: '128', value: 128 },
+                { name: '256', value: 256 },
+                { name: '512', value: 512 },
+                { name: '1024', value: 1024 },
+                { name: '2048', value: 2048 },
+                { name: '4096', value: 4096 }
+            )
         ),
 	async execute(interaction) {
         const user = interaction.options.getUser('user') || interaction.user;
+        const imageSize = interaction.options.getInteger('size') || 512;
 
         const avatarEmbed = new EmbedBuilder()
             .setColor(0x0099FF)
             .setTitle(`Avatar of ${user.username}`)
-            .setImage(user.displayAvatarURL({ dynamic: true, size: 512 }))
+            .setImage(user.displayAvatarURL({ dynamic: true, size: imageSize }))
             .setTimestamp()
             .setFooter({ text: 'Salafi Bot', iconURL: interaction.client.user.displayAvatarURL() });
 
