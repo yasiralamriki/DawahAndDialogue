@@ -14,9 +14,13 @@ const { Client, Collection, GatewayIntentBits } = require('discord.js'); // Impo
 dotenv.config();
 const token = process.env.DISCORD_TOKEN;
 
-// Create a new client instance
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
-
+const client = new Client({
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent  // Required for message content
+    ]
+});
 // Create a collection to store commands
 client.commands = new Collection();
 
