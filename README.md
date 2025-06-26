@@ -1,4 +1,4 @@
-<img src="https://github.com/user-attachments/assets/5c687445-0e78-4442-89f2-8e37e08f556f" alt="Salafi Discord Bot Logo" width="256" height="256"/>
+<img src="https://github.com/user-attachments/assets/6b1a176d-99eb-4584-a0aa-aa1c8c1c2b02" alt="Salafi Discord Bot Logo" width="256" height="256"/>
 
 # Salafi Discord Bot
 
