@@ -14,6 +14,8 @@ This bot aims to support Salafī Discord servers with beneficial utilities while
 
 ## 🛠 Setup
 
+### Option 1: Local Hosting
+
 1. Create an .env file in the directory
 
 ```env
@@ -23,6 +25,10 @@ GUILD_ID=DEV_SERVER_ID # Guild ID to deploy commands to for testing
 ```
 
 2. run `node .` or `node index.js`
+
+### Option 2: Use already hosted version of this bot
+This bot is being hosted on Google Cloud, and it will automatically pull the repo every 5 minutes to update
+You can add it [here](https://discord.com/oauth2/authorize?client_id=1386650006118858853)
 
 ---
 
