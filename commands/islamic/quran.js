@@ -8,7 +8,6 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js'); // Import necessary classes from discord.js
 const colors = require('../../config.json').colors; // Import colors from the config file
 const axios = require('axios');
-const { getAccessToken, getClientId } = require('../../utils/auth'); // Import utility functions for authentication
 
 const accessToken = process.env.QURAN_API_SECRET;
 const clientId = process.env.QURAN_API_CLIENT_ID;
