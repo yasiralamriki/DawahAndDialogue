@@ -6,6 +6,7 @@
 */
 
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js'); // Import necessary classes from discord.js
+const colors = require('../../config.json').colors; // Import colors from the config file
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -38,7 +39,7 @@ module.exports = {
 
         // Create an embed with the user's avatar
         const avatarEmbed = new EmbedBuilder()
-            .setColor(0x0099FF)
+            .setColor(colors.primary) // Set the embed color from the config file
             .setTitle(`Avatar of ${user.username}`)
             .setImage(user.displayAvatarURL({ dynamic: true, size: imageSize }))
             .setTimestamp()

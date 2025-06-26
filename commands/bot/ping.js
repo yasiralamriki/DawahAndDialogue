@@ -6,6 +6,7 @@
 */
 
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js'); // Import necessary classes from discord.js
+const colors = require('../../config.json').colors; // Import colors from the config file
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -14,7 +15,7 @@ module.exports = {
 	async execute(interaction) {
         // Create an embed with the bot's latency
         const pingEmbed = new EmbedBuilder()
-            .setColor(0x0099FF)
+            .setColor(colors.primary) // Set the embed color from the config file
             .setTitle(`Bot latency`)
             .setDescription(`🏓 Pong! Latency is ${Date.now() - interaction.createdTimestamp}ms`)
             .setTimestamp()
