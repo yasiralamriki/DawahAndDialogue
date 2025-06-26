@@ -17,9 +17,9 @@ This bot aims to support Salafī Discord servers with beneficial utilities while
 1. Create an .env file in the directory
 
 ```env
-DISCORD_TOKEN=YOUR_TOKEN // Token of your bot
-CLIENT_ID=YOUR_CLIENT_ID // Client ID of your bot
-GUILD_ID=DEV_SERVER_ID // Guild ID to deploy commands to for testing
+DISCORD_TOKEN=YOUR_TOKEN # Token of your bot
+CLIENT_ID=YOUR_CLIENT_ID # Client ID of your bot
+GUILD_ID=DEV_SERVER_ID # Guild ID to deploy commands to for testing
 ```
 
 2. run `node .` or `node index.js`
