@@ -1,24 +1,32 @@
-<img src="https://github.com/user-attachments/assets/5c687445-0e78-4442-89f2-8e37e08f556f" alt="Salafi Discord Bot Logo" width="256" height="256"/>
-
 # Salafi Discord Bot
+
+![Salafi Discord Bot Logo](https://github.com/user-attachments/assets/5c687445-0e78-4442-89f2-8e37e08f556f)
 
 A simple and purposeful Discord bot built upon the methodology of the Salaf. Designed to serve communities grounded in the Qur’ān, Sunnah, and understanding of the righteous predecessors.
 
 ---
 
-### 🧾 About
+## 🧾 About
 
 This bot aims to support Salafī Discord servers with beneficial utilities while maintaining clarity, simplicity, and adherence to authentic sources. It avoids entertainment-focused features and innovations, focusing instead on what benefits the Ummah.
 
 ---
 
-### 🛠 Setup
+## 🛠 Setup
 
-Coming soon.
+1. Create an .env file in the directory
+
+```env
+DISCORD_TOKEN=YOUR_TOKEN // Token of your bot
+CLIENT_ID=YOUR_CLIENT_ID // Client ID of your bot
+GUILD_ID=DEV_SERVER_ID // Guild ID to deploy commands to for testing
+```
+
+2. run `node .` or `node index.js`
 
 ---
 
-### 🤲 Intention
+## 🤲 Intention
 
 > *"Indeed, actions are judged by intentions..."*  
 > — [Ṣaḥīḥ al-Bukhārī, 1]
@@ -27,7 +35,7 @@ This project is a means of cooperation upon al-birr wa at-taqwā, and not upon f
 
 ---
 
-### 📖 License
+## 📖 License
 
 This project is open-source under the MIT License.  
 **Bārak Allāhu fīkum.**
