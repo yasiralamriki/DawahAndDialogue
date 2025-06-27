@@ -1,34 +1,26 @@
 const { EmbedBuilder } = require('discord.js');
+const colors = require('../config.json').colors;
 
 module.exports = {
     name: 'messageCreate',
     async execute(message) {
         if (message.author.bot) return;
 
-        const greetingTriggerPhase = 'As'; 
-        const greetingResponseEmbed = new EmbedBuilder()
-            .setColor(0x0F4D0F) 
-            .setDescription(`May peace, blessings and mercy of Allah be upon you.`)
-            .setTimestamp()
-        const content = message.content.trim(); 
-        if (content === greetingTriggerPhase) {
-            try {
-                await message.reply({ content: `${message.author} says, السلام عليكم ورحمة الله وبركاته`, embeds: [greetingResponseEmbed] });
-            } catch (error) {
-                console.error('Error replying to message:', error);
-            }
-        }
-        const replyTriggerPhase = 'Ws'; 
-        const replyResponseEmbed = new EmbedBuilder()
-            .setColor(0x0F4D0F) 
-            .setDescription(`Peace be upon you as well and Allah's mercy and blessings.`)
-            .setTimestamp()
+        const phrases = [
+            { phrase: 'as', response_ar: 'السلام عليكم ورحمة الله وبركاته', response_en: 'May the peace, blessings and mercy of Allah be upon you.' },
+            { phrase: 'ws', response_ar: 'وعليكم السلام ورحمة الله وبركاته', response_en: 'And may the peace, blessings and mercy of Allah be upon you.' }
+        ];
 
-        if (content === replyTriggerPhase) {
-            try {
-                await message.reply({ content: `${message.author} says, وعليكم السلام ورحمة الله وبركاته`, embeds: [replyResponseEmbed] });
-            } catch (error) {
-                console.error('Error replying to message:', error);
+        const content = message.content.trim().toLowerCase();
+
+        for (phrase of phrases) {
+            if (content === phrase.phrase) {
+                const phraseEmbed = new EmbedBuilder()
+                    .setColor(colors.primary)
+                    .setDescription(phrase.response_en)
+                    .setTimestamp()
+
+                await message.reply({ content: `${message.author} says ${phrase.response_ar}`, embeds: [phraseEmbed] });
             }
         }
     },
