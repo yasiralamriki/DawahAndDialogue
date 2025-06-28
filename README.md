@@ -22,6 +22,8 @@ This bot aims to support Salafī Discord servers with beneficial utilities while
 DISCORD_TOKEN=YOUR_TOKEN # Token of your bot
 CLIENT_ID=YOUR_CLIENT_ID # Client ID of your bot
 GUILD_ID=DEV_SERVER_ID # Guild ID to deploy commands to for testing
+QURAN_API_CLIENT_ID=YOUR_CLIENT_ID # Get API Key at https://api-docs.quran.foundation/request-access (production server)
+QURAN_API_SECRET=YOUR_CLIENT_SECRET # Get API Key at https://api-docs.quran.foundation/request-access (production server)
 ```
 
 2. run `node .` or `node index.js`
