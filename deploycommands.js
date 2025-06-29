@@ -36,26 +36,26 @@ if (!isGlobal && !guildId) {
 
 async function deployCommands() {
 	const commands = [];
-	
+
 	try {
 		console.log('🔄 Loading commands...');
-		
+
 		// Grab all the command folders from the commands directory
 		const foldersPath = path.join(__dirname, 'commands');
-		
+
 		if (!fs.existsSync(foldersPath)) {
 			console.error('❌ Commands directory not found at:', foldersPath);
 			process.exit(1);
 		}
-		
+
 		const commandFolders = fs.readdirSync(foldersPath);
 
 		// Loop through each folder in the commands directory
 		for (const folder of commandFolders) {
 			const commandsPath = path.join(foldersPath, folder);
-			
+
 			if (!fs.lstatSync(commandsPath).isDirectory()) continue;
-			
+
 			const commandFiles = fs
 				.readdirSync(commandsPath)
 				.filter(file => file.endsWith('.js'));
@@ -63,18 +63,18 @@ async function deployCommands() {
 			// Load each command file
 			for (const file of commandFiles) {
 				const filePath = path.join(commandsPath, file);
-				
+
 				try {
 					// Clear require cache to allow reloading
 					delete require.cache[require.resolve(filePath)];
 					const command = require(filePath);
-					
+
 					if ('data' in command && 'execute' in command) {
 						// If a specific command is requested, only deploy that command
 						if (specificCommand && command.data.name !== specificCommand) {
 							continue;
 						}
-						
+
 						commands.push(command.data.toJSON());
 						console.log(`✅ Loaded command: ${command.data.name}`);
 					} else {
@@ -103,7 +103,7 @@ async function deployCommands() {
 		console.log(`🚀 Started ${specificCommand ? `deploying command "${specificCommand}"` : `refreshing ${commands.length} application (/) commands`}...`);
 
 		// Determine the route based on global or guild deployment
-		const route = isGlobal 
+		const route = isGlobal
 			? Routes.applicationCommands(clientId)
 			: Routes.applicationGuildCommands(clientId, guildId);
 
@@ -114,7 +114,7 @@ async function deployCommands() {
 			const existingCommands = await rest.get(route);
 			const updatedCommands = existingCommands.filter(cmd => cmd.name !== specificCommand);
 			updatedCommands.push(...commands);
-			
+
 			data = await rest.put(route, { body: updatedCommands });
 			console.log(`✅ Successfully deployed command "${specificCommand}".`);
 		} else {
@@ -124,7 +124,7 @@ async function deployCommands() {
 		}
 
 		console.log(`📍 Deployment target: ${isGlobal ? 'Global' : `Guild (${guildId})`}`);
-		
+
 		if (!isGlobal && data.length > 0) {
 			console.log('ℹ️  Guild commands are available immediately.');
 		} else if (isGlobal && data.length > 0) {
@@ -133,13 +133,13 @@ async function deployCommands() {
 
 	} catch (error) {
 		console.error('❌ Error deploying commands:', error);
-		
+
 		if (error.code === 50001) {
 			console.error('   Missing Access - Check that your bot token is valid and the bot has necessary permissions.');
 		} else if (error.code === 50035) {
 			console.error('   Invalid Form Body - One or more commands have invalid data.');
 		}
-		
+
 		process.exit(1);
 	}
 }
