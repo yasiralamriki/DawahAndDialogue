@@ -10,6 +10,9 @@ const fs = require('node:fs');
 const path = require('node:path');
 const dotenv = require('dotenv');
 
+// Load config json
+const config = require('../../config.json');
+
 // Load environment variables from .env file
 dotenv.config();
 const clientId = process.env.CLIENT_ID;
@@ -20,7 +23,6 @@ module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('deploycommand')
 		.setDescription('Deploys the bot commands to the server.')
-		.setDefaultMemberPermissions(0)
 		.addBooleanOption((option) =>
 			option
 				.setName('global')
@@ -37,6 +39,12 @@ module.exports = {
 		),
 	async execute(interaction) {
 		await interaction.deferReply({ ephemeral: true }); // Defer the reply to allow time for command processing
+
+		// Check if the user is the bot owner
+		if (interaction.user.id !== config.ownerid) {
+			await interaction.editReply({ content: 'You are not authorized to use this command.', ephemeral: true });
+			return;
+		}
 
 		const specificCommand = interaction.options.getString('command');
 		const commands = []; // Create an array to hold the command data

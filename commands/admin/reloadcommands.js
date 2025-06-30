@@ -10,6 +10,9 @@ const fs = require('node:fs');
 const path = require('node:path');
 const dotenv = require('dotenv');
 
+// Load config
+const config = require('../../config.json');
+
 // Load environment variables from .env file
 dotenv.config();
 
@@ -25,6 +28,12 @@ module.exports = {
 		),
 	async execute(interaction) {
 		await interaction.deferReply({ ephemeral: true }); // Defer the reply to allow time for command processing
+
+		// Check if the user is the bot owner
+		if (interaction.user.id !== config.ownerid) {
+			await interaction.editReply({ content: 'You are not authorized to use this command.', ephemeral: true });
+			return;
+		}
 
 		const reloadedCommands = [];
 		const failedCommands = [];
