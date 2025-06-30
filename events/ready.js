@@ -12,7 +12,7 @@ module.exports = {
 	name: Events.ClientReady,
 	once: true,
 	async execute(client) {
-		console.log(`Ready! Logged in as ${client.user.tag}`);
+		console.log(`[INFO] Ready! Logged in as ${client.user.tag}`);
 
 		// Set custom activity status
 		client.user.setActivity('Following the Sunnah', { type: ActivityType.Custom });
