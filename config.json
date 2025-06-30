@@ -11,7 +11,7 @@
     "commands": {
         "deploycommand": true,
         "reloadcommands": true,
-        "ping": true,
+        "debug": true,
         "quran": true,
         "avatar": true,
         "remind": true,
