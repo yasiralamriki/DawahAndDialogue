@@ -2,5 +2,20 @@
     "colors" : {
         "primary": "#ffffff"
     },
+    "modules": {
+        "admin": true,
+        "bot": true,
+        "islamic": true,
+        "utility": true 
+    },
+    "commands": {
+        "deploycommand": true,
+        "reloadcommands": true,
+        "ping": true,
+        "quran": true,
+        "avatar": true,
+        "remind": true,
+        "timer": true
+    },
     "ownerid": "885646071399854161"
 }

@@ -10,6 +10,9 @@ const path = require('node:path');
 const dotenv = require('dotenv');
 const { Client, Collection, GatewayIntentBits } = require('discord.js'); // Import necessary classes from discord.js
 
+// Load config
+const config = require('./config.json'); // Load configuration file
+
 // Load environment variables from .env file
 dotenv.config();
 const token = process.env.DISCORD_TOKEN;
@@ -37,8 +40,12 @@ for (const folder of commandFolders) {
 		const command = require(filePath);
 
 		if ('data' in command && 'execute' in command) {
-			client.commands.set(command.data.name, command);
-			console.log(`[INFO] Loaded command: ${command.data.name}`);
+			if (config.commands[command.data.name] === true && config.modules[folder] === true) {
+				client.commands.set(command.data.name, command);
+				console.log(`[INFO] Loaded command: ${command.data.name}`);
+			} else {
+				console.log(`[INFO] Skipped command: ${command.data.name} (not enabled in config or module not loaded)`);
+			}
 		} else {
 			console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
 		}
