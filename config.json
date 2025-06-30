@@ -15,7 +15,9 @@
         "quran": true,
         "avatar": true,
         "remind": true,
-        "timer": true
+        "timer": true,
+        "translate": true,
+        "transliterate": true
     },
     "ownerid": "885646071399854161"
 }

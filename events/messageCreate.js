@@ -1,3 +1,10 @@
+/*
+    Name: messageCreate.js
+    Description: Event that handles message creation
+    Author: Salafi Bot Team
+    License: MIT
+*/
+
 const { EmbedBuilder } = require('discord.js');
 const colors = require('../config.json').colors;
 
@@ -25,4 +32,3 @@ module.exports = {
 		}
 	},
 };
-
