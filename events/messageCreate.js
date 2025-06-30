@@ -20,7 +20,7 @@ module.exports = {
 
 		const content = message.content.trim().toLowerCase();
 
-		for (phrase of phrases) {
+		for (const phrase of phrases) {
 			if (content === phrase.phrase) {
 				const phraseEmbed = new EmbedBuilder()
 					.setColor(colors.primary)
