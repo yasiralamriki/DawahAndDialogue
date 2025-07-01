@@ -29,7 +29,8 @@ module.exports = {
 			.addFields([
 				{ name: 'Latency', value: `\`${interaction.client.ws.ping} ms\``, inline: true },
 				{ name: 'Uptime', value: `\`${formatSeconds(Math.floor(interaction.client.uptime / 1000))}\``, inline: true },
-				{ name: 'Memory Usage', value: `\`${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB\``, inline: true },
+				{ name: 'Memory Usage', value: `\`${(process.memoryUsage().rss / 1024 / 1024).toFixed(2)} MB\``, inline: true },
+				{ name: 'CPU Usage', value: `\`${(process.cpuUsage().system / 1024 / 1024).toFixed(2)} %\``, inline: true },
 				{ name: 'Node.js Version', value: `\`${process.version}\``, inline: true },
 				{ name: 'Discord.js Version', value: `\`${version}\``, inline: true },
 				{ name: 'Guild Count', value: `\`${interaction.client.guilds.cache.size}\``, inline: true },
