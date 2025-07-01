@@ -84,7 +84,7 @@ module.exports = {
 			replyMessage += `Failed to reload ${failedCommands.length} commands`;
 		}
 		if (!replyMessage) {
-			replyMessage = 'No commands found to reload.';
+			replyMessage = ' No commands found to reload.';
 		}
 
 		await interaction.editReply(replyMessage);

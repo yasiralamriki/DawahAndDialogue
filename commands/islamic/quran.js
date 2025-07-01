@@ -15,8 +15,8 @@ const secret = process.env.QURAN_API_SECRET;
 let accessToken = null;
 
 // Debug: Check if environment variables are loaded
-console.log('Client ID loaded:', clientId ? 'Yes' : 'No');
-console.log('Secret loaded:', secret ? 'Yes' : 'No');
+console.log('[DEBUG] Client ID loaded:', clientId ? 'Yes' : 'No');
+console.log('[DEBUG] Secret loaded:', secret ? 'Yes' : 'No');
 
 async function getAccessToken() {
 	if (!clientId || !secret) {

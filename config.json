@@ -12,6 +12,7 @@
         "deploycommand": true,
         "reloadcommands": true,
         "debug": true,
+        "invite": true,
         "quran": true,
         "avatar": true,
         "remind": true,
