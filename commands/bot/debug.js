@@ -6,7 +6,7 @@
 */
 
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js'); // Import necessary classes from discord.js
-const colors = require('../../config.json').colors; // Import colors from the config file
+const config = require('../../config.json'); // Import the config file
 const dayjs = require('dayjs'); // Import dayjs for date formatting
 const utc = require('dayjs/plugin/utc'); // Import UTC plugin for dayjs to handle UTC time
 const version = require('../../package.json').dependencies['discord.js']; // Import the Discord.js version
@@ -24,7 +24,7 @@ module.exports = {
 	async execute(interaction) {
 		// Create an embed with the bot's debug information
 		const debugEmbed = new EmbedBuilder()
-			.setColor(colors.primary) // Set the embed color from the config file
+			.setColor(config.colors.primary) // Set the embed color from the config file
 			.setTitle('Bot Debug Information')
 			.addFields([
 				{ name: 'Latency', value: `\`${interaction.client.ws.ping} ms\``, inline: true },
@@ -34,6 +34,8 @@ module.exports = {
 				{ name: 'Discord.js Version', value: `\`${version}\``, inline: true },
 				{ name: 'Guild Count', value: `\`${interaction.client.guilds.cache.size}\``, inline: true },
 				{ name: 'User Count', value: `\`${interaction.client.users.cache.size}\``, inline: true },
+				{ name: 'Modules Loaded', value: `\`${Object.keys(config.modules).length} / ${Object.values(config.modules).filter(Boolean).length}\``, inline: true },
+				{ name: 'Commands Loaded', value: `\`${Object.keys(config.commands).length} / ${Object.values(config.commands).filter(Boolean).length}\``, inline: true },
 			])
 			.setThumbnail(interaction.client.user.displayAvatarURL())
 			.setTimestamp()
