@@ -1,14 +1,14 @@
 /*
-	Name: avatar.js
-	Description: Command to get the avatar of a user
-	Author: Salafi Bot Team
-	License: MIT
+    Name: avatar.js
+    Description: Command to get the avatar of a user
+    Author: Salafi Bot Team
+    License: MIT
 */
 
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js'); // Import necessary classes from discord.js
-const colors = require('../../config.json').colors; // Import colors from the config file
+import { SlashCommandBuilder, EmbedBuilder } from 'discord.js'; // Import necessary classes from discord.js
+import config from '../../config.json' with { type: 'json' }; // Import config from the config file
 
-module.exports = {
+export default {
 	data: new SlashCommandBuilder()
 		.setName('avatar')
 		.setDescription('Gets the avatar of a user')
@@ -39,7 +39,7 @@ module.exports = {
 
 		// Create an embed with the user's avatar
 		const avatarEmbed = new EmbedBuilder()
-			.setColor(colors.primary) // Set the embed color from the config file
+			.setColor(config.colors.primary) // Set the embed color from the config file
 			.setTitle(`Avatar of ${user.username}`)
 			.setImage(user.displayAvatarURL({ dynamic: true, size: imageSize }))
 			.setTimestamp()

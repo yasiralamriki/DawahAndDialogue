@@ -1,17 +1,22 @@
 /*
-	Name: deployCommand.js
-	Description: Command to deploy the bot commands to the server with individual targeting
-	Author: Salafi Bot Team
-	License: MIT
+    Name: deployCommand.js
+    Description: Command to deploy the bot commands to the server with individual targeting
+    Author: Salafi Bot Team
+    License: MIT
 */
 
-const { SlashCommandBuilder, REST, Routes } = require('discord.js'); // Import necessary classes from discord.js
-const fs = require('node:fs');
-const path = require('node:path');
-const dotenv = require('dotenv');
+import { SlashCommandBuilder, REST, Routes } from 'discord.js'; // Import necessary classes from discord.js
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import dotenv from 'dotenv';
+
+// Fix __dirname for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Load config json
-const config = require('../../config.json');
+import config from '../../config.json' with { type: 'json' };
 
 // Load environment variables from .env file
 dotenv.config();
@@ -19,7 +24,7 @@ const clientId = process.env.CLIENT_ID;
 const guildId = process.env.GUILD_ID;
 const token = process.env.DISCORD_TOKEN;
 
-module.exports = {
+export default {
 	data: new SlashCommandBuilder()
 		.setName('deploycommand')
 		.setDescription('Deploys the bot commands to the server.')
@@ -65,13 +70,15 @@ module.exports = {
 				// Ensure the file is a valid command file by checking for 'data' and 'execute' properties
 				if (!file.endsWith('.js')) continue; // Skip non-JS files
 				const filePath = path.join(commandsPath, file);
-				const command = require(filePath);
-				if ('data' in command && 'execute' in command) {
+				const fileURL = pathToFileURL(filePath).href; // Convert to file URL
+				const command = await import(fileURL); // Use dynamic import
+
+				if ('data' in command.default && 'execute' in command.default) {
 					// If a specific command is requested, only deploy that command
-					if (specificCommand && command.data.name !== specificCommand) {
+					if (specificCommand && command.default.data.name !== specificCommand) {
 						continue;
 					}
-					commands.push(command.data.toJSON());
+					commands.push(command.default.data.toJSON());
 				} else {
 					await interaction.editReply(
 						`The command at ${filePath} is missing a required "data" or "execute" property.`,
@@ -125,6 +132,7 @@ module.exports = {
 					);
 					updatedCommands.push(...commands);
 
+					await rest.put(route, { body: updatedCommands });
 					await interaction.editReply(
 						`Successfully deployed command "${specificCommand}".`,
 					);

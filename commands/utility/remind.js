@@ -1,6 +1,13 @@
-const { SlashCommandBuilder } = require('discord.js');
+/*
+    Name: remind.js
+    Description: Set a reminder and get pinged later
+    Author: Salafi Bot Team
+    License: MIT
+*/
 
-module.exports = {
+import { SlashCommandBuilder } from 'discord.js';
+
+export default {
 	data: new SlashCommandBuilder()
 		.setName('remind')
 		.setDescription('Set a reminder and get pinged later!')

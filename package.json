@@ -4,13 +4,14 @@
   "description": "",
   "license": "MIT",
   "author": "",
-  "type": "commonjs",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "@google/genai": "^1.7.0",
+    "@google/generative-ai": "^0.24.1",
     "axios": "^1.10.0",
     "dayjs": "^1.11.13",
     "discord.js": "^14.20.0",

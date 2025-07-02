@@ -1,21 +1,18 @@
-/*
-	Name: index.js
-	Description: Main entry point for the Discord bot
-	Author: Salafi Bot Team
-	License: MIT
-*/
-
-const fs = require('node:fs');
-const path = require('node:path');
-const dotenv = require('dotenv');
-const { Client, Collection, GatewayIntentBits } = require('discord.js'); // Import necessary classes from discord.js
-
-// Load config
-const config = require('./config.json'); // Load configuration file
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import dotenv from 'dotenv'; // Import dotenv to load environment variables
+import { Client, Collection, GatewayIntentBits } from 'discord.js'; // Import necessary classes from discord.js
+import { Modules } from './src/modules.js'; // Import modules library
+import { Commands } from './src/commands.js';
 
 // Load environment variables from .env file
 dotenv.config();
 const token = process.env.DISCORD_TOKEN;
+
+// Fix __dirname for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const client = new Client({
 	intents: [
@@ -35,16 +32,36 @@ for (const folder of commandFolders) {
 	const commandsPath = path.join(foldersPath, folder);
 	const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 
+	// Create a module for the folder
+	if (!Modules.getModuleByName(folder)) {
+		Modules.createModule(folder);
+		console.log(`[INFO] Created module: ${folder}`);
+	} else {
+		console.log(`[INFO] Module ${folder} already exists, skipping creation.`);
+	}
+
 	for (const file of commandFiles) {
 		const filePath = path.join(commandsPath, file);
-		const command = require(filePath);
+		const fileURL = pathToFileURL(filePath).href; // Convert to file URL
+		const command = await import(fileURL); // Use file URL for import
 
-		if ('data' in command && 'execute' in command) {
-			if (config.commands[command.data.name] === true && config.modules[folder] === true) {
-				client.commands.set(command.data.name, command);
-				console.log(`[INFO] Loaded command: ${command.data.name}`);
+		if ('data' in command.default && 'execute' in command.default) {
+			// Check if the module is enabled in the config
+			const moduleObj = Modules.getModuleByName(folder);
+			const commandObj = Commands.getCommandByName(command.default.data.name);
+			if (moduleObj && moduleObj.enabled && commandObj && commandObj.enabled) {
+				client.commands.set(command.default.data.name, command.default);
+				console.log(`[INFO] Loaded command: ${command.default.data.name} from module: ${folder}`);
 			} else {
-				console.log(`[INFO] Skipped command: ${command.data.name} (not enabled in config or module not loaded)`);
+				console.log(`[INFO] Command ${command.default.data.name} is not enabled, skipping.`);
+			}
+
+			// Check if the module is enabled in the config
+			if (moduleObj && moduleObj.enabled === true && commandObj && commandObj.enabled === true) {
+				client.commands.set(command.default.data.name, command.default);
+				console.log(`[INFO] Loaded command: ${command.default.data.name} from module: ${folder}`);
+			} else {
+				console.log(`[INFO] ${moduleObj ? `Module ${folder} is not enabled` : `Module ${folder} does not exist`} ? : Command ${command.default.data.name} is not enabled, skipping.`);
 			}
 		} else {
 			console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
@@ -58,14 +75,15 @@ const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'
 
 for (const file of eventFiles) {
 	const filePath = path.join(eventsPath, file);
-	const event = require(filePath);
+	const fileURL = pathToFileURL(filePath).href; // Convert to file URL
+	const event = await import(fileURL); // Use file URL for import
 
-	if (event.once) {
-		client.once(event.name, (...args) => event.execute(...args));
+	if (event.default.once) {
+		client.once(event.default.name, (...args) => event.default.execute(...args));
 	} else {
-		client.on(event.name, (...args) => event.execute(...args));
+		client.on(event.default.name, (...args) => event.default.execute(...args));
 	}
-	console.log(`[INFO] Loaded event: ${event.name}`);
+	console.log(`[INFO] Loaded event: ${event.default.name}`);
 }
 
 // Log in to Discord with your client's token

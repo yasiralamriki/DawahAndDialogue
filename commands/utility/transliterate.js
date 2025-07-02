@@ -1,15 +1,22 @@
-// Require environment variables from .env file
-require('dotenv').config();
+/*
+    Name: transliterate.js
+    Description: Transliterates Arabic into English text with phonetics using Gemini AI
+    Author: Salafi Bot Team
+    License: MIT
+*/
+
+import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import config from '../../config.json' with { type: 'json' };
+import dotenv from 'dotenv';
+
+// Load environment variables from .env file
+dotenv.config();
 const geminiAPIKey = process.env.GEMINI_API_KEY;
 
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { GoogleGenAI } = require('@google/genai');
+const genAI = new GoogleGenerativeAI(geminiAPIKey);
 
-const config = require('../../config.json');
-
-const ai = new GoogleGenAI({ apiKey: geminiAPIKey });
-
-module.exports = {
+export default {
 	data: new SlashCommandBuilder()
 		.setName('transliterate')
 		.setDescription('Transliterates Arabic into English text with phonetics.')
@@ -32,17 +39,22 @@ module.exports = {
 				text: 'Gemini 2.0 Flash',
 			})
 			.setTitle('Transliteration Request')
-			.setDescription('Placeholder');
+			.setDescription('Processing...');
 
-		async function main() {
-			const response = await ai.models.generateContent({
-				model: 'gemini-2.0-flash',
-				contents: `Transliterate the following Arabic text: ${text}`,
-			});
-			transliterationEmbed.setDescription(response.text);
-			await interaction.reply({ embeds: [transliterationEmbed] });
+		await interaction.reply({ embeds: [transliterationEmbed] });
+
+		try {
+			const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+			const result = await model.generateContent(`Transliterate the following Arabic text: ${text}`);
+			const response = await result.response;
+			const transliteratedText = response.text();
+
+			transliterationEmbed.setDescription(transliteratedText);
+			await interaction.editReply({ embeds: [transliterationEmbed] });
+		} catch (error) {
+			console.error('Transliteration error:', error);
+			transliterationEmbed.setDescription('Sorry, there was an error processing your transliteration request.');
+			await interaction.editReply({ embeds: [transliterationEmbed] });
 		}
-
-		main();
 	},
 };

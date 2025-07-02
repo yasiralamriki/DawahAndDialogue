@@ -5,19 +5,24 @@
     License: MIT
 */
 
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js'); // Import necessary classes from discord.js
-const config = require('../../config.json'); // Import the config file
-const dayjs = require('dayjs'); // Import dayjs for date formatting
-const utc = require('dayjs/plugin/utc'); // Import UTC plugin for dayjs to handle UTC time
-const version = require('../../package.json').dependencies['discord.js']; // Import the Discord.js version
+import { SlashCommandBuilder, EmbedBuilder } from 'discord.js'; // Import necessary classes from discord.js
+import config from '../../config.json' with { type: 'json' }; // Import the config file
+import packageJson from '../../package.json' with { type: 'json' }; // Import the package.json file
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc.js';
 
+// Extend dayjs with utc plugin
 dayjs.extend(utc);
 
+// Get Discord.js version from package.json
+const version = packageJson.dependencies['discord.js'];
+
+// Function to format seconds into HH:MM:SS format
 function formatSeconds(seconds) {
 	return dayjs.utc(seconds * 1000).format('HH:mm:ss');
 }
 
-module.exports = {
+export default {
 	data: new SlashCommandBuilder()
 		.setName('debug')
 		.setDescription('Gets the bot\'s debug information'),

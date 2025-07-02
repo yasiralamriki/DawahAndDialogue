@@ -1,15 +1,22 @@
-// Require environment variables from .env file
-require('dotenv').config();
+/*
+    Name: translate.js
+    Description: Translates text with precision using Gemini AI
+    Author: Salafi Bot Team
+    License: MIT
+*/
+
+import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import config from '../../config.json' with { type: 'json' };
+import dotenv from 'dotenv';
+
+// Load environment variables from .env file
+dotenv.config();
 const geminiAPIKey = process.env.GEMINI_API_KEY;
 
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { GoogleGenAI } = require('@google/genai');
+const genAI = new GoogleGenerativeAI(geminiAPIKey);
 
-const config = require('../../config.json');
-
-const ai = new GoogleGenAI({ apiKey: geminiAPIKey });
-
-module.exports = {
+export default {
 	data: new SlashCommandBuilder()
 		.setName('translate')
 		.setDescription('Translates text with precision.')
@@ -37,17 +44,22 @@ module.exports = {
 				text: 'Gemini 2.0 Flash',
 			})
 			.setTitle('Translation Request')
-			.setDescription('Placeholder');
+			.setDescription('Processing...');
 
-		async function main() {
-			const response = await ai.models.generateContent({
-				model: 'gemini-2.0-flash',
-				contents: `Translate the following text into ${language}: ${text}.`,
-			});
-			translationEmbed.setDescription(response.text);
-			await interaction.reply({ embeds: [translationEmbed] });
+		await interaction.reply({ embeds: [translationEmbed] });
+
+		try {
+			const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+			const result = await model.generateContent(`Translate the following text into ${language}: ${text}.`);
+			const response = await result.response;
+			const translatedText = response.text();
+
+			translationEmbed.setDescription(translatedText);
+			await interaction.editReply({ embeds: [translationEmbed] });
+		} catch (error) {
+			console.error('Translation error:', error);
+			translationEmbed.setDescription('Sorry, there was an error processing your translation request.');
+			await interaction.editReply({ embeds: [translationEmbed] });
 		}
-
-		main();
 	},
 };

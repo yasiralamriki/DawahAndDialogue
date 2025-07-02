@@ -1,15 +1,16 @@
 {
-    "colors" : {
+    "colors": {
         "primary": "#ffffff"
     },
     "modules": {
         "admin": true,
         "bot": true,
         "islamic": true,
-        "utility": true 
+        "utility": true
     },
     "commands": {
         "deploycommand": true,
+        "module": true,
         "reloadcommands": true,
         "debug": true,
         "invite": true,

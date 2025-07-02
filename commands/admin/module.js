@@ -1,0 +1,85 @@
+/*
+    Name: module.js
+    Description: Command to manage bot modules
+    Author: Salafi Bot Team
+    License: MIT
+*/
+
+import { SlashCommandBuilder, EmbedBuilder } from 'discord.js'; // Import necessary classes from discord.js
+import config from '../../config.json' with { type: 'json' }; // Import colors from the config file
+import fs from 'node:fs'; // Import the file system module
+import path from 'node:path'; // Import the path module for file paths
+import { fileURLToPath } from 'node:url'; // Import for __dirname fix
+
+// Fix __dirname for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+export default {
+	data: new SlashCommandBuilder()
+		.setName('module')
+		.setDescription('Manages bot modules')
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('enable')
+				.setDescription('Enable a bot module')
+				.addStringOption(option =>
+					option.setName('module')
+						.setDescription('The name of the module to enable')
+						.setRequired(true)),
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('disable')
+				.setDescription('Disable a bot module')
+				.addStringOption(option =>
+					option.setName('module')
+						.setDescription('The name of the module to disable')
+						.setRequired(true)),
+		),
+	async execute(interaction) {
+		// Get the subcommand and module name from the interaction
+		const subcommand = interaction.options.getSubcommand();
+		const moduleName = interaction.options.getString('module');
+
+		// Create an embed with the user's avatar
+		const moduleEmbed = new EmbedBuilder()
+			.setColor(config.colors.primary) // Set the embed color from the config file
+			.setTitle(`${subcommand === 'enable' ? 'Enable' : 'Disable'} Module: ${moduleName}`)
+			.setDescription(`You have requested to ${subcommand === 'enable' ? 'enable' : 'disable'} the module: **${moduleName}**.`)
+			.setTimestamp()
+			.setFooter({ text: 'Salafi Bot', iconURL: interaction.client.user.displayAvatarURL() });
+
+		// Check if the module exists
+		const foldersPath = path.join(__dirname, '..');
+		const modulePath = path.join(foldersPath, moduleName);
+
+		if (fs.existsSync(modulePath) && fs.statSync(modulePath).isDirectory()) {
+			moduleEmbed.setDescription(`${subcommand === 'enable' ? 'Enabling' : 'Disabling'} the module: **${moduleName}**.`);
+			if (config.modules[moduleName] !== undefined) {
+				if (subcommand === 'enable') {
+					// Check if the module is already enabled
+					if (config.modules[moduleName] === true) {
+						moduleEmbed.setDescription(`The module **${moduleName}** is already enabled.`);
+					} else {
+						config.modules[moduleName] = true; // Enable the module
+						moduleEmbed.setDescription(`The module **${moduleName}** has been enabled.`);
+					}
+				} else if (subcommand === 'disable') {
+					// Check if the module is already disabled
+					if (config.modules[moduleName] === false) {
+						moduleEmbed.setDescription(`The module **${moduleName}** is already disabled.`);
+					} else {
+						config.modules[moduleName] = false; // Disable the module
+						moduleEmbed.setDescription(`The module **${moduleName}** has been disabled.`);
+					}
+				}
+			}
+		} else {
+			moduleEmbed.setDescription(`The module **${moduleName}** does not exist. \n Available modules: ${fs.readdirSync(foldersPath).filter(item => fs.statSync(path.join(foldersPath, item)).isDirectory()).join(', ')}`);
+		}
+
+		// Reply to the interaction with the embed
+		await interaction.reply({ embeds: [moduleEmbed] });
+	},
+};

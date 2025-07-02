@@ -1,6 +1,13 @@
-const { SlashCommandBuilder } = require('discord.js');
+/*
+    Name: timer.js
+    Description: Set a timer and get reminded after a certain time
+    Author: Salafi Bot Team
+    License: MIT
+*/
 
-module.exports = {
+import { SlashCommandBuilder } from 'discord.js';
+
+export default {
 	data: new SlashCommandBuilder()
 		.setName('timer')
 		.setDescription('Set a timer and get reminded after a certain time.')

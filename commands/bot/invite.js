@@ -1,14 +1,14 @@
 /*
     Name: invite.js
-    Description: Debug command for the bot to display server resources
+    Description: Command to get the bot's invite link
     Author: Salafi Bot Team
     License: MIT
 */
 
-const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, OAuth2Scopes } = require('discord.js'); // Import necessary classes from discord.js
-const colors = require('../../config.json').colors; // Import colors from the config file
+import { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, OAuth2Scopes } from 'discord.js'; // Import necessary classes from discord.js
+import config from '../../config.json' with { type: 'json' }; // Import the config file
 
-module.exports = {
+export default {
 	data: new SlashCommandBuilder()
 		.setName('invite')
 		.setDescription('Gets the bot\'s invite link'),
@@ -26,7 +26,7 @@ module.exports = {
 
 		// Create an embed with the bot's invite link
 		const inviteEmbed = new EmbedBuilder()
-			.setColor(colors.primary) // Set the embed color from the config file
+			.setColor(config.colors.primary) // Set the embed color from the config file
 			.setTitle('Bot Invite Link')
 			.addFields(
 				{ name: 'Bot Invite Link', value: `[Invite the bot](${link})`, inline: false },

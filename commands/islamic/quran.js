@@ -5,11 +5,13 @@
     License: MIT
 */
 
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const colors = require('../../config.json').colors;
-const axios = require('axios');
+import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
+import config from '../../config.json' with { type: 'json' };
+import axios from 'axios';
+import dotenv from 'dotenv';
 
 // Load environment variables from .env file
+dotenv.config();
 const clientId = process.env.QURAN_API_CLIENT_ID;
 const secret = process.env.QURAN_API_SECRET;
 let accessToken = null;
@@ -23,7 +25,7 @@ async function getAccessToken() {
 		throw new Error('Missing API credentials. Check your .env file.');
 	}
 
-	const config = {
+	const tokenRequestConfig = {
 		method: 'post',
 		maxBodyLength: Infinity,
 		url: 'https://oauth2.quran.foundation/oauth2/token',
@@ -35,7 +37,7 @@ async function getAccessToken() {
 	};
 
 	try {
-		const response = await axios(config);
+		const response = await axios(tokenRequestConfig);
 		return response.data.access_token;
 	} catch (error) {
 		console.error('Error getting access token:', error.response?.data || error.message);
@@ -50,7 +52,61 @@ async function ensureAccessToken() {
 	return accessToken;
 }
 
-module.exports = {
+async function getArabicVerseText(chapter, verse) {
+	await ensureAccessToken();
+
+	const requestConfig = {
+		method: 'get',
+		maxBodyLength: Infinity,
+		url: `https://apis.quran.foundation/content/api/v4/quran/verses/uthmani?verse_key=${chapter}:${verse}`,
+		headers: {
+			'Accept': 'application/json',
+			'x-auth-token': accessToken,
+			'x-client-id': clientId,
+		},
+	};
+
+	try {
+		const response = await axios(requestConfig);
+		const verses = response.data?.verses;
+		if (Array.isArray(verses) && verses.length > 0) {
+			return verses[0].text_uthmani;
+		}
+		return null;
+	} catch (error) {
+		console.error('Arabic verse error:', error.response?.data || error.message);
+		throw error;
+	}
+}
+
+async function getEnglishVerseText(chapter, verse, translationId = 203) {
+	await ensureAccessToken();
+
+	const requestConfig = {
+		method: 'get',
+		maxBodyLength: Infinity,
+		url: `https://apis.quran.foundation/content/api/v4/quran/translations/${translationId}?verse_key=${chapter}:${verse}`,
+		headers: {
+			'Accept': 'application/json',
+			'x-auth-token': accessToken,
+			'x-client-id': clientId,
+		},
+	};
+
+	try {
+		const response = await axios(requestConfig);
+		const translations = response.data?.translations;
+		if (Array.isArray(translations) && translations.length > 0) {
+			return translations[0].text;
+		}
+		return null;
+	} catch (error) {
+		console.error('English verse error:', error.response?.data || error.message);
+		throw error;
+	}
+}
+
+export default {
 	data: new SlashCommandBuilder()
 		.setName('quran')
 		.setDescription('Gets a verse from the Quran')
@@ -94,7 +150,7 @@ module.exports = {
 			}
 
 			const quranEmbed = new EmbedBuilder()
-				.setColor(colors.primary)
+				.setColor(config.colors.primary)
 				.setTitle(`Ayah ${surah}:${ayah}`)
 				.addFields(
 					{ name: 'Arabic', value: arabicText || 'Not available.' },
@@ -112,57 +168,3 @@ module.exports = {
 		}
 	},
 };
-
-async function getArabicVerseText(chapter, verse) {
-	await ensureAccessToken();
-
-	const config = {
-		method: 'get',
-		maxBodyLength: Infinity,
-		url: `https://apis.quran.foundation/content/api/v4/quran/verses/uthmani?verse_key=${chapter}:${verse}`,
-		headers: {
-			'Accept': 'application/json',
-			'x-auth-token': accessToken,
-			'x-client-id': clientId,
-		},
-	};
-
-	try {
-		const response = await axios(config);
-		const verses = response.data?.verses;
-		if (Array.isArray(verses) && verses.length > 0) {
-			return verses[0].text_uthmani;
-		}
-		return null;
-	} catch (error) {
-		console.error('Arabic verse error:', error.response?.data || error.message);
-		throw error;
-	}
-}
-
-async function getEnglishVerseText(chapter, verse, translationId = 203) {
-	await ensureAccessToken();
-
-	const config = {
-		method: 'get',
-		maxBodyLength: Infinity,
-		url: `https://apis.quran.foundation/content/api/v4/quran/translations/${translationId}?verse_key=${chapter}:${verse}`,
-		headers: {
-			'Accept': 'application/json',
-			'x-auth-token': accessToken,
-			'x-client-id': clientId,
-		},
-	};
-
-	try {
-		const response = await axios(config);
-		const translations = response.data?.translations;
-		if (Array.isArray(translations) && translations.length > 0) {
-			return translations[0].text;
-		}
-		return null;
-	} catch (error) {
-		console.error('English verse error:', error.response?.data || error.message);
-		throw error;
-	}
-}

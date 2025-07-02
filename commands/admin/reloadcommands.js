@@ -5,18 +5,16 @@
 	License: MIT
 */
 
-const { SlashCommandBuilder } = require('discord.js'); // Import necessary classes from discord.js
-const fs = require('node:fs');
-const path = require('node:path');
-const dotenv = require('dotenv');
+import { SlashCommandBuilder } from 'discord.js'; // Import necessary classes from discord.js
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url'; // Import for __dirname fix
 
-// Load config
-const config = require('../../config.json');
+// Fix __dirname for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-// Load environment variables from .env file
-dotenv.config();
-
-module.exports = {
+export default {
 	data: new SlashCommandBuilder()
 		.setName('reloadcommands')
 		.setDescription('Reloads the bot commands.')
@@ -56,15 +54,20 @@ module.exports = {
 				const filePath = path.join(commandsPath, file);
 
 				try {
-					// Clear the require cache for this file
-					delete require.cache[require.resolve(filePath)];
+					// Convert file path to file URL for ES6 import
+					const fileURL = pathToFileURL(filePath).href;
 
-					// Re-require the command file
-					const command = require(filePath);
+					// Add cache busting parameter to force reload
+					const cacheBustURL = `${fileURL}?update=${Date.now()}`;
 
-					if ('data' in command && 'execute' in command) {
-						interaction.client.commands.set(command.data.name, command);
-						reloadedCommands.push(command.data.name);
+					// Re-import the command file
+					const command = await import(cacheBustURL);
+
+					if ('data' in command.default && 'execute' in command.default) {
+						// Add module name to command
+						command.default.module = folder;
+						interaction.client.commands.set(command.default.data.name, command.default);
+						reloadedCommands.push(command.default.data.name);
 					} else {
 						failedCommands.push(`${file} - Missing "data" or "execute" property`);
 					}
@@ -78,13 +81,13 @@ module.exports = {
 		// Send a single reply with the results
 		let replyMessage = '';
 		if (reloadedCommands.length > 0) {
-			replyMessage += `Reloaded ${reloadedCommands.length} commands`;
+			replyMessage += `Reloaded ${reloadedCommands.length} commands: ${reloadedCommands.join(', ')}`;
 		}
 		if (failedCommands.length > 0) {
-			replyMessage += `Failed to reload ${failedCommands.length} commands`;
+			replyMessage += `Failed to reload ${failedCommands.length} commands:\n${failedCommands.join('\n')}`;
 		}
 		if (!replyMessage) {
-			replyMessage = ' No commands found to reload.';
+			replyMessage = 'No commands found to reload.';
 		}
 
 		await interaction.editReply(replyMessage);

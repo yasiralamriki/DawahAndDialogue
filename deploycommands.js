@@ -1,15 +1,20 @@
 /*
-	Name: deploy-commands.js
-	Description: Standalone script to deploy bot commands to Discord
-	Author: Salafi Bot Team
-	License: MIT
-	Usage: node deploy-commands.js [--global] [--command commandname]
+    Name: deploy-commands.js
+    Description: Standalone script to deploy bot commands to Discord
+    Author: Salafi Bot Team
+    License: MIT
+    Usage: node deploy-commands.js [--global] [--command commandname]
 */
 
-const { REST, Routes } = require('discord.js');
-const fs = require('node:fs');
-const path = require('node:path');
-const dotenv = require('dotenv');
+import { REST, Routes } from 'discord.js';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import dotenv from 'dotenv';
+
+// Fix __dirname for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Load environment variables from .env file
 dotenv.config();
@@ -25,127 +30,127 @@ const specificCommand = commandIndex !== -1 && args[commandIndex + 1] ? args[com
 
 // Validate environment variables
 if (!clientId || !token) {
-	console.error('❌ Missing required environment variables: CLIENT_ID and DISCORD_TOKEN must be set in .env file');
-	process.exit(1);
+    console.error('❌ Missing required environment variables: CLIENT_ID and DISCORD_TOKEN must be set in .env file');
+    process.exit(1);
 }
 
 if (!isGlobal && !guildId) {
-	console.error('❌ Missing GUILD_ID environment variable required for guild-specific deployment');
-	process.exit(1);
+    console.error('❌ Missing GUILD_ID environment variable required for guild-specific deployment');
+    process.exit(1);
 }
 
 async function deployCommands() {
-	const commands = [];
+    const commands = [];
 
-	try {
-		console.log('🔄 Loading commands...');
+    try {
+        console.log('🔄 Loading commands...');
 
-		const foldersPath = path.join(__dirname, 'commands');
+        const foldersPath = path.join(__dirname, 'commands');
 
-		if (!fs.existsSync(foldersPath)) {
-			console.error('❌ Commands directory not found at:', foldersPath);
-			process.exit(1);
-		}
+        if (!fs.existsSync(foldersPath)) {
+            console.error('❌ Commands directory not found at:', foldersPath);
+            process.exit(1);
+        }
 
-		const commandFolders = fs.readdirSync(foldersPath);
+        const commandFolders = fs.readdirSync(foldersPath);
 
-		for (const folder of commandFolders) {
-			const commandsPath = path.join(foldersPath, folder);
+        for (const folder of commandFolders) {
+            const commandsPath = path.join(foldersPath, folder);
 
-			if (!fs.lstatSync(commandsPath).isDirectory()) continue;
+            if (!fs.lstatSync(commandsPath).isDirectory()) continue;
 
-			const commandFiles = fs
-				.readdirSync(commandsPath)
-				.filter(file => file.endsWith('.js'));
+            const commandFiles = fs
+                .readdirSync(commandsPath)
+                .filter(file => file.endsWith('.js'));
 
-			for (const file of commandFiles) {
-				const filePath = path.join(commandsPath, file);
+            for (const file of commandFiles) {
+                const filePath = path.join(commandsPath, file);
 
-				try {
-					delete require.cache[require.resolve(filePath)];
-					const command = require(filePath);
+                try {
+                    const fileURL = pathToFileURL(filePath).href;
+                    const command = await import(fileURL);
 
-					if ('data' in command && 'execute' in command) {
-						if (specificCommand && command.data.name !== specificCommand) {
-							continue;
-						}
+                    if ('data' in command.default && 'execute' in command.default) {
+                        if (specificCommand && command.default.data.name !== specificCommand) {
+                            continue;
+                        }
 
-						commands.push(command.data.toJSON());
-						console.log(`✅ Loaded command: ${command.data.name}`);
-					} else {
-						console.warn(`⚠️  The command at ${filePath} is missing a required "data" or "execute" property.`);
-					}
-				} catch (error) {
-					console.error(`❌ Error loading command ${file}:`, error.message);
-				}
-			}
-		}
+                        commands.push(command.default.data.toJSON());
+                        console.log(`✅ Loaded command: ${command.default.data.name}`);
+                    } else {
+                        console.warn(`⚠️  The command at ${filePath} is missing a required "data" or "execute" property.`);
+                    }
+                } catch (error) {
+                    console.error(`❌ Error loading command ${file}:`, error.message);
+                }
+            }
+        }
 
-		if (specificCommand && commands.length === 0) {
-			console.error(`❌ Command "${specificCommand}" not found.`);
-			process.exit(1);
-		}
+        if (specificCommand && commands.length === 0) {
+            console.error(`❌ Command "${specificCommand}" not found.`);
+            process.exit(1);
+        }
 
-		if (commands.length === 0) {
-			console.error('❌ No valid commands found to deploy.');
-			process.exit(1);
-		}
+        if (commands.length === 0) {
+            console.error('❌ No valid commands found to deploy.');
+            process.exit(1);
+        }
 
-		const rest = new REST().setToken(token);
-		console.log(`🚀 Started ${specificCommand ? `deploying command "${specificCommand}"` : `refreshing ${commands.length} application (/) commands`}...`);
+        const rest = new REST().setToken(token);
+        console.log(`🚀 Started ${specificCommand ? `deploying command "${specificCommand}"` : `refreshing ${commands.length} application (/) commands`}...`);
 
-		const route = isGlobal
-			? Routes.applicationCommands(clientId)
-			: Routes.applicationGuildCommands(clientId, guildId);
+        const route = isGlobal
+            ? Routes.applicationCommands(clientId)
+            : Routes.applicationGuildCommands(clientId, guildId);
 
-		// 🆕 Fetch existing commands to prevent duplicates
-		const existingCommands = await rest.get(route);
-		const isDuplicate = (cmd) => existingCommands.some(existing => existing.name === cmd.name);
+        // 🆕 Fetch existing commands to prevent duplicates
+        const existingCommands = await rest.get(route);
+        const isDuplicate = (cmd) => existingCommands.some(existing => existing.name === cmd.name);
 
-		let filteredCommands;
+        let filteredCommands;
 
-		if (specificCommand) {
-			// Remove old version of the specific command and deploy new one
-			filteredCommands = existingCommands.filter(cmd => cmd.name !== specificCommand);
-			filteredCommands.push(...commands);
-		} else {
-			// Skip already deployed commands
-			const newUniqueCommands = commands.filter(cmd => !isDuplicate(cmd));
+        if (specificCommand) {
+            // Remove old version of the specific command and deploy new one
+            filteredCommands = existingCommands.filter(cmd => cmd.name !== specificCommand);
+            filteredCommands.push(...commands);
+        } else {
+            // Skip already deployed commands
+            const newUniqueCommands = commands.filter(cmd => !isDuplicate(cmd));
 
-			if (newUniqueCommands.length === 0) {
-				console.log('⚠️  All commands already deployed. No changes made.');
-				process.exit(0);
-			}
+            if (newUniqueCommands.length === 0) {
+                console.log('⚠️  All commands already deployed. No changes made.');
+                process.exit(0);
+            }
 
-			filteredCommands = [...existingCommands, ...newUniqueCommands];
-		}
+            filteredCommands = [...existingCommands, ...newUniqueCommands];
+        }
 
-		const data = await rest.put(route, { body: filteredCommands });
+        const data = await rest.put(route, { body: filteredCommands });
 
-		console.log(`✅ Successfully ${specificCommand ? `deployed "${specificCommand}"` : `deployed ${data.length} application (/) commands`}.`);
-		console.log(`📍 Deployment target: ${isGlobal ? 'Global' : `Guild (${guildId})`}`);
+        console.log(`✅ Successfully ${specificCommand ? `deployed "${specificCommand}"` : `deployed ${data.length} application (/) commands`}.`);
+        console.log(`📍 Deployment target: ${isGlobal ? 'Global' : `Guild (${guildId})`}`);
 
-		if (!isGlobal && data.length > 0) {
-			console.log('ℹ️  Guild commands are available immediately.');
-		} else if (isGlobal && data.length > 0) {
-			console.log('ℹ️  Global commands may take up to 1 hour to update across all servers.');
-		}
+        if (!isGlobal && data.length > 0) {
+            console.log('ℹ️  Guild commands are available immediately.');
+        } else if (isGlobal && data.length > 0) {
+            console.log('ℹ️  Global commands may take up to 1 hour to update across all servers.');
+        }
 
-	} catch (error) {
-		console.error('❌ Error deploying commands:', error);
+    } catch (error) {
+        console.error('❌ Error deploying commands:', error);
 
-		if (error.code === 50001) {
-			console.error('   Missing Access - Check that your bot token is valid and the bot has necessary permissions.');
-		} else if (error.code === 50035) {
-			console.error('   Invalid Form Body - One or more commands have invalid data.');
-		}
+        if (error.code === 50001) {
+            console.error('   Missing Access - Check that your bot token is valid and the bot has necessary permissions.');
+        } else if (error.code === 50035) {
+            console.error('   Invalid Form Body - One or more commands have invalid data.');
+        }
 
-		process.exit(1);
-	}
+        process.exit(1);
+    }
 }
 
 function showUsage() {
-	console.log(`
+    console.log(`
 Usage: node deploy-commands.js [options]
 
 Options:

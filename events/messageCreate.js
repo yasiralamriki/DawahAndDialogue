@@ -5,30 +5,30 @@
     License: MIT
 */
 
-const { EmbedBuilder } = require('discord.js');
-const colors = require('../config.json').colors;
+import { EmbedBuilder } from 'discord.js';
+import config from '../config.json' with { type: 'json' };
 
-module.exports = {
-	name: 'messageCreate',
-	async execute(message) {
-		if (message.author.bot) return;
+export default {
+    name: 'messageCreate',
+    async execute(message) {
+        if (message.author.bot) return;
 
-		const phrases = [
-			{ phrase: 'as', response_ar: 'السلام عليكم ورحمة الله وبركاته', response_en: 'May the peace, blessings and mercy of Allah be upon you.' },
-			{ phrase: 'ws', response_ar: 'وعليكم السلام ورحمة الله وبركاته', response_en: 'And may the peace, blessings and mercy of Allah be upon you.' },
-		];
+        const phrases = [
+            { phrase: 'as', response_ar: 'السلام عليكم ورحمة الله وبركاته', response_en: 'May the peace, blessings and mercy of Allah be upon you.' },
+            { phrase: 'ws', response_ar: 'وعليكم السلام ورحمة الله وبركاته', response_en: 'And may the peace, blessings and mercy of Allah be upon you.' },
+        ];
 
-		const content = message.content.trim().toLowerCase();
+        const content = message.content.trim().toLowerCase();
 
-		for (const phrase of phrases) {
-			if (content === phrase.phrase) {
-				const phraseEmbed = new EmbedBuilder()
-					.setColor(colors.primary)
-					.setDescription(phrase.response_en)
-					.setTimestamp();
+        for (const phrase of phrases) {
+            if (content === phrase.phrase) {
+                const phraseEmbed = new EmbedBuilder()
+                    .setColor(config.colors.primary)
+                    .setDescription(phrase.response_en)
+                    .setTimestamp();
 
-				await message.reply({ content: `${message.author} says ${phrase.response_ar}`, embeds: [phraseEmbed] });
-			}
-		}
-	},
+                await message.reply({ content: `${message.author} says ${phrase.response_ar}`, embeds: [phraseEmbed] });
+            }
+        }
+    },
 };
