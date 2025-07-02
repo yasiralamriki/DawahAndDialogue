@@ -46,15 +46,17 @@ for (const folder of commandFolders) {
 		const command = await import(fileURL); // Use file URL for import
 
 		if ('data' in command.default && 'execute' in command.default) {
+			// Update commands in config
+			if (!Commands.getCommandByName(command.default.data.name)) {
+				Commands.createCommand(command.default.data.name, folder);
+				console.log(`[INFO] Created command: ${command.default.data.name} in module: ${folder}`);
+			} else {
+				console.log(`[INFO] Command ${command.default.data.name} already exists in module: ${folder}, skipping creation.`);
+			}
+
 			// Check if the module is enabled in the config
 			const moduleObj = Modules.getModuleByName(folder);
 			const commandObj = Commands.getCommandByName(command.default.data.name);
-			if (moduleObj && moduleObj.enabled && commandObj && commandObj.enabled) {
-				client.commands.set(command.default.data.name, command.default);
-				console.log(`[INFO] Loaded command: ${command.default.data.name} from module: ${folder}`);
-			} else {
-				console.log(`[INFO] Command ${command.default.data.name} is not enabled, skipping.`);
-			}
 
 			// Check if the module is enabled in the config
 			if (moduleObj && moduleObj.enabled === true && commandObj && commandObj.enabled === true) {
