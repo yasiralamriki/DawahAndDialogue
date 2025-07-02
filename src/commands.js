@@ -9,7 +9,6 @@ import config from '../config.json' with { type: 'json' };
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { Module } from './modules.js'; // Import the Module class
 
 // Fix __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -26,19 +25,27 @@ export class Command {
         this.name = commandName;
         this.module = moduleName;
         this.enabled = true;
-        config.commands[this.name] = true; // Store as boolean
+        config.commands[this.name] = { enabled: true, module: moduleName }; // Always store as object
         saveConfig();
     }
 
     enable() {
         this.enabled = true;
-        config.commands[this.name] = true;
+        if (typeof config.commands[this.name] === 'object') {
+            config.commands[this.name].enabled = true;
+        } else {
+            config.commands[this.name] = { enabled: true, module: this.module };
+        }
         saveConfig();
     }
 
     disable() {
         this.enabled = false;
-        config.commands[this.name] = false;
+        if (typeof config.commands[this.name] === 'object') {
+            config.commands[this.name].enabled = false;
+        } else {
+            config.commands[this.name] = { enabled: false, module: this.module };
+        }
         saveConfig();
     }
 }
@@ -55,7 +62,12 @@ export function getCommands() {
 }
 
 export function getCommandByName(name) {
-    return config.commands[name] !== undefined ? { name, enabled: !!config.commands[name], module: config.commands[name].module } : null;
+    const entry = config.commands[name];
+    if (entry === undefined) return null;
+    if (typeof entry === 'object') {
+        return { name, enabled: !!entry.enabled, module: entry.module || null };
+    }
+    return { name, enabled: !!entry, module: null };
 }
 
 export const Commands = {

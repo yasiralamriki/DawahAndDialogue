@@ -9,17 +9,50 @@
         "utility": true
     },
     "commands": {
-        "deploycommand": true,
-        "module": true,
-        "reloadcommands": true,
-        "debug": true,
-        "invite": true,
-        "quran": true,
-        "avatar": true,
-        "remind": true,
-        "timer": true,
-        "translate": true,
-        "transliterate": true
+        "deploycommand": {
+            "enabled": true,
+            "module": "admin"
+        },
+        "module": {
+            "enabled": true,
+            "module": "admin"
+        },
+        "reloadcommands": {
+            "enabled": true,
+            "module": "admin"
+        },
+        "debug": {
+            "enabled": true,
+            "module": "bot"
+        },
+        "invite": {
+            "enabled": true,
+            "module": "bot"
+        },
+        "quran": {
+            "enabled": true,
+            "module": "islamic"
+        },
+        "avatar": {
+            "enabled": true,
+            "module": "utility"
+        },
+        "remind": {
+            "enabled": true,
+            "module": "utility"
+        },
+        "timer": {
+            "enabled": true,
+            "module": "utility"
+        },
+        "translate": {
+            "enabled": true,
+            "module": "utility"
+        },
+        "transliterate": {
+            "enabled": true,
+            "module": "utility"
+        }
     },
     "ownerid": "885646071399854161"
 }

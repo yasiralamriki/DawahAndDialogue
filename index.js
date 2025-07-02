@@ -29,46 +29,58 @@ const foldersPath = path.join(__dirname, 'commands');
 const commandFolders = fs.readdirSync(foldersPath);
 
 for (const folder of commandFolders) {
-	const commandsPath = path.join(foldersPath, folder);
-	const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+    const commandsPath = path.join(foldersPath, folder);
+    const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 
-	// Create a module for the folder
-	if (!Modules.getModuleByName(folder)) {
-		Modules.createModule(folder);
-		console.log(`[INFO] Created module: ${folder}`);
-	} else {
-		console.log(`[INFO] Module ${folder} already exists, skipping creation.`);
-	}
+    // Create a module for the folder
+    if (!Modules.getModuleByName(folder)) {
+        Modules.createModule(folder);
+        console.log(`[INFO] Created module: ${folder}`);
+    } else {
+        console.log(`[INFO] Module ${folder} already exists, skipping creation.`);
+    }
 
-	for (const file of commandFiles) {
-		const filePath = path.join(commandsPath, file);
-		const fileURL = pathToFileURL(filePath).href; // Convert to file URL
-		const command = await import(fileURL); // Use file URL for import
+    for (const file of commandFiles) {
+        const filePath = path.join(commandsPath, file);
+        const fileURL = pathToFileURL(filePath).href; // Convert to file URL
+        const command = await import(fileURL); // Use file URL for import
 
-		if ('data' in command.default && 'execute' in command.default) {
-			// Update commands in config
-			if (!Commands.getCommandByName(command.default.data.name)) {
-				Commands.createCommand(command.default.data.name, folder);
-				console.log(`[INFO] Created command: ${command.default.data.name} in module: ${folder}`);
-			} else {
-				console.log(`[INFO] Command ${command.default.data.name} already exists in module: ${folder}, skipping creation.`);
-			}
+        if ('data' in command.default && 'execute' in command.default) {
+            // Always set the module property on the command object
+            command.default.module = folder;
 
-			// Check if the module is enabled in the config
-			const moduleObj = Modules.getModuleByName(folder);
-			const commandObj = Commands.getCommandByName(command.default.data.name);
+            // Update commands in config
+            const existing = Commands.getCommandByName(command.default.data.name);
+            if (!existing) {
+                Commands.createCommand(command.default.data.name, folder);
+                console.log(`[INFO] Created command: ${command.default.data.name} in module: ${folder}`);
+            } else {
+                // If the module is different, update it in config
+                if (existing.module !== folder) {
+                    const entry = Commands.getCommands()[command.default.data.name];
+                    if (typeof entry === 'object') {
+                        entry.module = folder;
+                    }
+                    console.log(`[INFO] Updated module for command: ${command.default.data.name} to ${folder}`);
+                } else {
+                    console.log(`[INFO] Command ${command.default.data.name} already exists in module: ${folder}, skipping creation.`);
+                }
+            }
 
-			// Check if the module is enabled in the config
-			if (moduleObj && moduleObj.enabled === true && commandObj && commandObj.enabled === true) {
-				client.commands.set(command.default.data.name, command.default);
-				console.log(`[INFO] Loaded command: ${command.default.data.name} from module: ${folder}`);
-			} else {
-				console.log(`[INFO] ${moduleObj ? `Module ${folder} is not enabled` : `Module ${folder} does not exist`} ? : Command ${command.default.data.name} is not enabled, skipping.`);
-			}
-		} else {
-			console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
-		}
-	}
+            // Check if the module is enabled in the config
+            const moduleObj = Modules.getModuleByName(folder);
+            const commandObj = Commands.getCommandByName(command.default.data.name);
+
+            if (moduleObj && moduleObj.enabled === true && commandObj && commandObj.enabled === true) {
+                client.commands.set(command.default.data.name, command.default);
+                console.log(`[INFO] Loaded command: ${command.default.data.name} from module: ${folder}`);
+            } else {
+                console.log(`[INFO] ${moduleObj ? `Module ${folder} is not enabled` : `Module ${folder} does not exist`} ? : Command ${command.default.data.name} is not enabled, skipping.`);
+            }
+        } else {
+            console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+        }
+    }
 }
 
 // Load events
