@@ -40,8 +40,8 @@ export default {
 				{ name: 'Discord.js Version', value: `\`${version}\``, inline: true },
 				{ name: 'Guild Count', value: `\`${interaction.client.guilds.cache.size}\``, inline: true },
 				{ name: 'User Count', value: `\`${interaction.client.users.cache.size}\``, inline: true },
-				{ name: 'Modules Loaded', value: `\`${Object.keys(config.modules).length} / ${Object.values(config.modules).filter(Boolean).length}\``, inline: true },
-				{ name: 'Commands Loaded', value: `\`${Object.keys(config.commands).length} / ${Object.values(config.commands).filter(Boolean).length}\``, inline: true },
+				{ name: 'Modules Loaded', value: `\`${Object.values(config.modules).filter(Boolean).length} / ${Object.keys(config.modules).length}\``, inline: true },
+				{ name: 'Commands Loaded', value: `\`${Object.values(config.commands).filter(Boolean).length} / ${Object.keys(config.commands).length}\``, inline: true },
 			])
 			.setThumbnail(interaction.client.user.displayAvatarURL())
 			.setTimestamp()
