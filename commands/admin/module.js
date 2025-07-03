@@ -38,6 +38,12 @@ export default {
 						.setRequired(true)),
 		),
 	async execute(interaction) {
+		// Check if the user is an admin
+		if (!interaction.client.config.admins.includes(interaction.user.id)) {
+			await interaction.editReply({ content: 'You are not authorized to use this command.', ephemeral: true });
+			return;
+		}
+
 		// Get the subcommand and module name from the interaction
 		const subcommand = interaction.options.getSubcommand();
 		const moduleName = interaction.options.getString('module');

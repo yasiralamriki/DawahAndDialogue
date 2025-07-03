@@ -45,8 +45,8 @@ export default {
 	async execute(interaction) {
 		await interaction.deferReply({ ephemeral: true }); // Defer the reply to allow time for command processing
 
-		// Check if the user is the bot owner
-		if (interaction.user.id !== config.ownerid) {
+		// Check if the user is an admin
+		if (!interaction.client.config.admins.includes(interaction.user.id)) {
 			await interaction.editReply({ content: 'You are not authorized to use this command.', ephemeral: true });
 			return;
 		}
