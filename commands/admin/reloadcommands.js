@@ -8,7 +8,8 @@
 import { SlashCommandBuilder } from 'discord.js'; // Import necessary classes from discord.js
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url'; // Import for __dirname fix
+import { fileURLToPath, pathToFileURL } from 'node:url'; // Import for __dirname fix
+import config from '../../config.json' with { type: 'json' }; // Import the config file for colors and other settings
 
 // Fix __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -28,7 +29,7 @@ export default {
 		await interaction.deferReply({ ephemeral: true }); // Defer the reply to allow time for command processing
 
 		// Check if the user is an admin
-		if (!interaction.client.config.admins.includes(interaction.user.id)) {
+		if (!config.admins.includes(interaction.user.id)) {
 			await interaction.editReply({ content: 'You are not authorized to use this command.', ephemeral: true });
 			return;
 		}

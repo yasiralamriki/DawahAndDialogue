@@ -39,7 +39,7 @@ export default {
 		),
 	async execute(interaction) {
 		// Check if the user is an admin
-		if (!interaction.client.config.admins.includes(interaction.user.id)) {
+		if (!config.admins.includes(interaction.user.id)) {
 			await interaction.editReply({ content: 'You are not authorized to use this command.', ephemeral: true });
 			return;
 		}
