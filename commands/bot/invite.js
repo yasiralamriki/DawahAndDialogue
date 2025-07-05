@@ -32,7 +32,6 @@ export default {
 				{ name: 'Bot Invite Link', value: `[Invite the bot](${link})`, inline: false },
 				{ name: 'App Invite Link', value: `[Invite the app](https://discord.com/oauth2/authorize?client_id=${interaction.client.user.id})`, inline: false },
 			)
-			.setDescription(`[Click here to invite the bot](${link})`)
 			.setThumbnail(interaction.client.user.displayAvatarURL())
 			.setTimestamp()
 			.setFooter({ text: 'Salafi Bot', iconURL: interaction.client.user.displayAvatarURL() });
