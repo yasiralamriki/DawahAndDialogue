@@ -37,31 +37,11 @@ export class Command {
         config.commands[this.name] = { enabled: true, module: moduleName }; // Always store as object
         saveConfig();
     }
-
-    enable() {
-        this.enabled = true;
-        if (typeof config.commands[this.name] === 'object') {
-            config.commands[this.name].enabled = true;
-        } else {
-            config.commands[this.name] = { enabled: true, module: this.module };
-        }
-        saveConfig();
-    }
-
-    disable() {
-        this.enabled = false;
-        if (typeof config.commands[this.name] === 'object') {
-            config.commands[this.name].enabled = false;
-        } else {
-            config.commands[this.name] = { enabled: false, module: this.module };
-        }
-        saveConfig();
-    }
 }
 
 export function createCommand(commandName, moduleName) {
     if (getCommandByName(commandName)) {
-        throw new Error(`Command "${commandName}" already exists.`);
+        throw new Error(`[ERROR] Command "${commandName}" already exists.`);
     }
     return new Command(commandName, moduleName);
 }
@@ -148,10 +128,32 @@ export function reloadCommand(commandName) {
     const command = getCommandByName(commandName);
     if (command) {
         // Reload the command
-        console.log(`Reloading command: ${commandName}`);
+        console.log(`[INFO] Reloading command: ${commandName}`);
     } else {
-        throw new Error(`Command "${commandName}" does not exist.`);
+        throw new Error(`[ERROR] Command "${commandName}" does not exist.`);
     }
+}
+
+export function enableCommand(commandName) {
+    const command = getCommandByName(commandName);
+    if (typeof config.commands[command.name] === 'object') {
+        config.commands[command.name].enabled = true;
+        return `[INFO] Command "${commandName}" has been enabled.`;
+    } else {
+        config.commands[command.name] = { enabled: true, module: command.module };
+    }
+    saveConfig();
+}
+
+export function disableCommand(commandName) {
+    const command = getCommandByName(commandName);
+    if (typeof config.commands[command.name] === 'object') {
+        config.commands[command.name].enabled = false;
+        return `[INFO] Command "${commandName}" has been disabled.`;
+    } else {
+        config.commands[command.name] = { enabled: false, module: command.module };
+    }
+    saveConfig();
 }
 
 export const Commands = {
@@ -160,5 +162,7 @@ export const Commands = {
     getCommands,
     getCommandByName,
     deployCommand,
-    reloadCommand
+    reloadCommand,
+    enableCommand,
+    disableCommand
 };

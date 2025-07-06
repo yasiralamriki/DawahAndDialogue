@@ -52,6 +52,10 @@
         "transliterate": {
             "enabled": true,
             "module": "utility"
+        },
+        "command": {
+            "enabled": true,
+            "module": "admin"
         }
     },
     "admins": [

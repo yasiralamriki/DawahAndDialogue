@@ -28,18 +28,6 @@ export class Module {
         config.modules[this.name] = true;
         saveConfig();
     }
-
-    enable() {
-        this.enabled = true;
-        config.modules[this.name] = true;
-        saveConfig();
-    }
-
-    disable() {
-        this.enabled = false;
-        config.modules[this.name] = false;
-        saveConfig();
-    }
 }
 
 export function createModule(moduleName) {
@@ -110,11 +98,37 @@ export function reloadModule(moduleName) {
     }
 }
 
+export function enableModule(moduleName) {
+    const module = getModuleByName(moduleName);
+    if (module) {
+        module.enabled = true;
+        config.modules[module.name] = true;
+        saveConfig();
+        return `[INFO] Module "${moduleName}" has been enabled.`;
+    } else {
+        throw new Error(`[ERROR] Module "${moduleName}" does not exist.`);
+    }
+}
+
+export function disableModule(moduleName) {
+    const module = getModuleByName(moduleName);
+    if (module) {
+        module.enabled = false;
+        config.modules[module.name] = false;
+        saveConfig();
+        return `[INFO] Module "${moduleName}" has been disabled.`;
+    } else {
+        throw new Error(`[ERROR] Module "${moduleName}" does not exist.`);
+    }
+}
+
 export const Modules = {
     Module,
     createModule,
     getModules,
     getModuleByName,
     deployModule,
-    reloadModule
+    reloadModule,
+    enableModule,
+    disableModule
 };
