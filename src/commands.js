@@ -124,11 +124,72 @@ export async function deployCommand(commandName, globally = false) {
     }
 }
 
-export function reloadCommand(commandName) {
+export async function reloadCommand(commandName, interaction) {
     const command = getCommandByName(commandName);
     if (command) {
         // Reload the command
         console.log(`[INFO] Reloading command: ${commandName}`);
+        const reloadedCommands = [];
+		const failedCommands = [];
+
+		// Grab all the command folders from the commands directory you created earlier
+		const foldersPath = path.join(__dirname, '../commands');
+		const commandFolders = fs.readdirSync(foldersPath);
+
+		// Loop through each folder in the commands directory
+		for (const folder of commandFolders) {
+			// Grab all the command files from the commands directory you created earlier
+			const commandsPath = path.join(foldersPath, folder);
+			const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+
+			// Grab the SlashCommandBuilder#toJSON() output of each command's data for deployment
+			for (const file of commandFiles) {
+				// Import the command file
+				// Ensure the file is a valid command file by checking for 'data' and 'execute' properties
+				if (!file.endsWith('.js')) continue; // Skip non-JS files
+				const filePath = path.join(commandsPath, file);
+
+				try {
+					// Convert file path to file URL for ES6 import
+					const fileURL = pathToFileURL(filePath).href;
+
+					// Add cache busting parameter to force reload
+					const cacheBustURL = `${fileURL}?update=${Date.now()}`;
+
+					// Re-import the command file
+					const command = await import(cacheBustURL);
+
+					if ('data' in command.default && 'execute' in command.default) {
+						// Add module name to command
+                        if (command.default.data.name === commandName) {
+                            command.default.module = folder;
+                            reloadedCommands.push(command.default.data.name);
+                            interaction.client.commands.set(command.default.data.name, command.default);
+                            break;
+                        }
+					} else {
+						failedCommands.push(`${file} - Missing "data" or "execute" property`);
+					}
+				} catch (error) {
+					console.error(error);
+					failedCommands.push(`${file} - ${error.message}`);
+				}
+			}
+		}
+
+		// Send a single reply with the results
+		let replyMessage = '';
+		if (reloadedCommands.length > 0) {
+			replyMessage += `Reloaded ${reloadedCommands.length} commands: ${reloadedCommands.join(', ')}`;
+		}
+		if (failedCommands.length > 0) {
+			replyMessage += `Failed to reload ${failedCommands.length} commands:\n${failedCommands.join('\n')}`;
+		}
+		if (!replyMessage) {
+			replyMessage = 'No commands found to reload.';
+		}
+
+		await interaction.editReply(replyMessage);
     } else {
         throw new Error(`[ERROR] Command "${commandName}" does not exist.`);
     }

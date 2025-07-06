@@ -60,11 +60,6 @@ export default {
 					option.setName('command')
 						.setDescription('The name of the command to reload')
 						.setRequired(true))
-				.addBooleanOption(option =>
-					option.setName('globally')
-						.setDescription('Reload the command globally (default: false)')
-						.setRequired(true)
-				)
 		),
 	async execute(interaction) {
 		// Check if the user is an admin
@@ -137,7 +132,7 @@ export default {
 				}
 			} else if (subcommand === 'reload') {
 				// Call the reload function
-				Commands.reloadCommand(commandName);
+				Commands.reloadCommand(commandName, interaction);
 			}
 		}
 	},

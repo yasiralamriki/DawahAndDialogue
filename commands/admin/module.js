@@ -59,11 +59,6 @@ export default {
 					option.setName('module')
 						.setDescription('The name of the module to reload')
 						.setRequired(true))
-				.addBooleanOption(option =>
-					option.setName('globally')
-						.setDescription('Reload the module globally (default: false)')
-						.setRequired(true)
-				)
 		),
 	async execute(interaction) {
 		// Check if the user is an admin
