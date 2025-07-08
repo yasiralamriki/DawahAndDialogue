@@ -130,8 +130,24 @@ export default {
 					await interaction.editReply({ embeds: [resultEmbed], ephemeral: true });
 				}
 			} else if (subcommand === 'reload') {
+				// Create an embed for the reload result
+				const reloadEmbed = new EmbedBuilder()
+					.setColor(config.colors.primary)
+					.setTitle('Module Reload')
+					.setDescription(`Reloading module: **${moduleName}**`)
+					.setTimestamp()
+					.setFooter({ text: 'Salafi Bot', iconURL: interaction.client.user.displayAvatarURL() });
+
 				// Call the reload function
-				Modules.reloadModule(moduleName);
+				try {
+					const result = await Modules.reloadModule(moduleName, interaction);
+
+					reloadEmbed.setDescription(result);
+					await interaction.editReply({ embeds: [reloadEmbed], ephemeral: true });
+				} catch (error) {
+					reloadEmbed.setDescription(`Failed to reload module: **${moduleName}**\nError: ${error.message}`);
+					await interaction.editReply({ embeds: [reloadEmbed], ephemeral: true });
+				}
 			}
 		}
 	},

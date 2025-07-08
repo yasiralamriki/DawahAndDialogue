@@ -88,14 +88,47 @@ export async function deployModule(moduleName, globally = false) {
     return `[INFO] Module "${moduleName}" deployed successfully.\n${results.join('\n')}`;
 }
 
-export function reloadModule(moduleName) {
+export async function reloadModule(moduleName, interaction) {
     const module = getModuleByName(moduleName);
-    if (module) {
-        // Reload the module
-        console.log(`[INFO] Reloading module: ${moduleName}`);
-    } else {
+    if (!module) {
         throw new Error(`[ERROR] Module "${moduleName}" does not exist.`);
     }
+
+    console.log(`[INFO] Reloading module: ${moduleName}`);
+    const foldersPath = path.join(__dirname, '../commands');
+    const commandFolders = fs.readdirSync(foldersPath);
+    const commandFolder = commandFolders.find(folder => folder === moduleName);
+    if (!commandFolder) {
+        throw new Error(`[ERROR] Command folder for module "${moduleName}" not found.`);
+    }
+    const commandsPath = path.join(foldersPath, commandFolder);
+    const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+
+    let results = [];
+    let errors = [];
+
+    for (const file of commandFiles) {
+        const filePath = path.join(commandsPath, file);
+        const fileURL = pathToFileURL(filePath).href;
+        const command = await import(fileURL);
+
+        if ('data' in command.default && 'execute' in command.default) {
+            try {
+                const result = await Commands.reloadCommand(command.default.data.name, interaction);
+                results.push(result);
+            } catch (err) {
+                errors.push(`[${file}]: ${err.message}`);
+            }
+        } else {
+            errors.push(`[${file}]: Missing "data" or "execute" property.`);
+        }
+    }
+
+    if (errors.length > 0) {
+        throw new Error(`[ERROR] Received one or more errors:\n${errors.join('\n')}`);
+    }
+
+    return `[INFO] Module "${moduleName}" reloaded successfully.\n${results.join('\n')}`;
 }
 
 export function enableModule(moduleName) {
