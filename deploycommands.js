@@ -30,12 +30,12 @@ const specificCommand = commandIndex !== -1 && args[commandIndex + 1] ? args[com
 
 // Validate environment variables
 if (!clientId || !token) {
-    console.error('❌ Missing required environment variables: CLIENT_ID and DISCORD_TOKEN must be set in .env file');
+    console.error('[ERROR] Missing required environment variables: CLIENT_ID and DISCORD_TOKEN must be set in .env file');
     process.exit(1);
 }
 
 if (!isGlobal && !guildId) {
-    console.error('❌ Missing GUILD_ID environment variable required for guild-specific deployment');
+    console.error('[ERROR] Missing GUILD_ID environment variable required for guild-specific deployment');
     process.exit(1);
 }
 
@@ -43,12 +43,12 @@ async function deployCommands() {
     const commands = [];
 
     try {
-        console.log('🔄 Loading commands...');
+        console.log('[INFO] Loading commands...');
 
         const foldersPath = path.join(__dirname, 'commands');
 
         if (!fs.existsSync(foldersPath)) {
-            console.error('❌ Commands directory not found at:', foldersPath);
+            console.error('[ERROR] Commands directory not found at:', foldersPath);
             process.exit(1);
         }
 
@@ -76,28 +76,28 @@ async function deployCommands() {
                         }
 
                         commands.push(command.default.data.toJSON());
-                        console.log(`✅ Loaded command: ${command.default.data.name}`);
+                        console.log(`[INFO] Loaded command: ${command.default.data.name}`);
                     } else {
-                        console.warn(`⚠️  The command at ${filePath} is missing a required "data" or "execute" property.`);
+                        console.warn(`[WARN] The command at ${filePath} is missing a required "data" or "execute" property.`);
                     }
                 } catch (error) {
-                    console.error(`❌ Error loading command ${file}:`, error.message);
+                    console.error(`[ERROR] Error loading command ${file}:`, error.message);
                 }
             }
         }
 
         if (specificCommand && commands.length === 0) {
-            console.error(`❌ Command "${specificCommand}" not found.`);
+            console.error(`[ERROR] Command "${specificCommand}" not found.`);
             process.exit(1);
         }
 
         if (commands.length === 0) {
-            console.error('❌ No valid commands found to deploy.');
+            console.error(`[ERROR] No valid commands found to deploy.`);
             process.exit(1);
         }
 
         const rest = new REST().setToken(token);
-        console.log(`🚀 Started ${specificCommand ? `deploying command "${specificCommand}"` : `refreshing ${commands.length} application (/) commands`}...`);
+        console.log(`[INFO] Started ${specificCommand ? `deploying command "${specificCommand}"` : `refreshing ${commands.length} application (/) commands`}...`);
 
         const route = isGlobal
             ? Routes.applicationCommands(clientId)
@@ -118,7 +118,7 @@ async function deployCommands() {
             const newUniqueCommands = commands.filter(cmd => !isDuplicate(cmd));
 
             if (newUniqueCommands.length === 0) {
-                console.log('⚠️  All commands already deployed. No changes made.');
+                console.log('[INFO] All commands already deployed. No changes made.');
                 process.exit(0);
             }
 
@@ -127,22 +127,22 @@ async function deployCommands() {
 
         const data = await rest.put(route, { body: filteredCommands });
 
-        console.log(`✅ Successfully ${specificCommand ? `deployed "${specificCommand}"` : `deployed ${data.length} application (/) commands`}.`);
-        console.log(`📍 Deployment target: ${isGlobal ? 'Global' : `Guild (${guildId})`}`);
+        console.log(`[INFO] Successfully ${specificCommand ? `deployed "${specificCommand}"` : `deployed ${data.length} application (/) commands`}.`);
+        console.log(`[INFO] Deployment target: ${isGlobal ? 'Global' : `Guild (${guildId})`}`);
 
         if (!isGlobal && data.length > 0) {
-            console.log('ℹ️  Guild commands are available immediately.');
+            console.log('[INFO] Guild commands are available immediately.');
         } else if (isGlobal && data.length > 0) {
-            console.log('ℹ️  Global commands may take up to 1 hour to update across all servers.');
+            console.log('[INFO] Global commands may take up to 1 hour to update across all servers.');
         }
 
     } catch (error) {
         console.error('❌ Error deploying commands:', error);
 
         if (error.code === 50001) {
-            console.error('   Missing Access - Check that your bot token is valid and the bot has necessary permissions.');
+            console.error('[ERROR] Missing Access - Check that your bot token is valid and the bot has necessary permissions.');
         } else if (error.code === 50035) {
-            console.error('   Invalid Form Body - One or more commands have invalid data.');
+            console.error('[ERROR] Invalid Form Body - One or more commands have invalid data.');
         }
 
         process.exit(1);
