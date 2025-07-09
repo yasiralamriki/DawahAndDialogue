@@ -78,6 +78,8 @@ export default {
 				await interaction.reply({ content: `The command **${commandName}** does not exist.`, ephemeral: true });
 				return;
 			} else {
+				await interaction.deferReply({ ephemeral: true }); // Defer the reply to allow time for command processing
+
 				// Create an embed with the user's avatar
 				const commandEmbed = new EmbedBuilder()
 					.setColor(config.colors.primary) // Set the embed color from the config file
@@ -106,7 +108,7 @@ export default {
 				}
 				
 				// Reply to the interaction with the embed
-				await interaction.reply({ embeds: [commandEmbed] });
+				await interaction.editReply({ embeds: [commandEmbed] });
 			}
 		} else if (subcommand === 'deploy' || subcommand === 'reload') {
 			await interaction.deferReply({ ephemeral: true }); // Defer the reply to allow time for command processing

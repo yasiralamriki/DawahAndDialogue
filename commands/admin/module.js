@@ -67,6 +67,8 @@ export default {
 			return;
 		}
 
+		await interaction.deferReply({ ephemeral: true }); // Defer the reply to allow time for command processing
+
 		// Get the subcommand and module name from the interaction
 		const subcommand = interaction.options.getSubcommand();
 		const moduleName = interaction.options.getString('module');
@@ -74,7 +76,7 @@ export default {
 		if (subcommand === 'enable' || subcommand === 'disable') {
 			if (Modules.getModuleByName(moduleName) === null) {
 				// If the module does not exist, send an error message
-				await interaction.reply({ content: `The module **${moduleName}** does not exist.`, ephemeral: true });
+				await interaction.editReply({ content: `The module **${moduleName}** does not exist.` });
 				return;
 			} else {
 				// Create an embed with the user's avatar
@@ -105,7 +107,7 @@ export default {
 				}
 				
 				// Reply to the interaction with the embed
-				await interaction.reply({ embeds: [moduleEmbed] });
+				await interaction.editReply({ embeds: [moduleEmbed] });
 			}
 		} else if (subcommand === 'deploy' || subcommand === 'reload') {
 			await interaction.deferReply({ ephemeral: true }); // Defer the reply to allow time for command processing
