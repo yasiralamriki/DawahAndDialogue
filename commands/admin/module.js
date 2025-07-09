@@ -110,8 +110,6 @@ export default {
 				await interaction.editReply({ embeds: [moduleEmbed] });
 			}
 		} else if (subcommand === 'deploy' || subcommand === 'reload') {
-			await interaction.deferReply({ ephemeral: true }); // Defer the reply to allow time for command processing
-
 			if (subcommand === 'deploy') {
 				// Create an embed for the deployment result
 				const resultEmbed = new EmbedBuilder()

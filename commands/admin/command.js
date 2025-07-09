@@ -111,8 +111,6 @@ export default {
 				await interaction.editReply({ embeds: [commandEmbed] });
 			}
 		} else if (subcommand === 'deploy' || subcommand === 'reload') {
-			await interaction.deferReply({ ephemeral: true }); // Defer the reply to allow time for command processing
-
 			if (subcommand === 'deploy') {
 				// Create an embed for the deployment result
 				const resultEmbed = new EmbedBuilder()
@@ -133,8 +131,24 @@ export default {
 					await interaction.editReply({ embeds: [resultEmbed], ephemeral: true });
 				}
 			} else if (subcommand === 'reload') {
-				// Call the reload function
-				Commands.reloadCommand(commandName, interaction);
+				// Create an embed for the reload result
+				const reloadEmbed = new EmbedBuilder()
+					.setColor(config.colors.primary)
+					.setTitle('Command Reload')
+					.setDescription(`Reloading command: **${commandName}**`)
+					.setTimestamp()
+					.setFooter({ text: 'Salafi Bot', iconURL: interaction.client.user.displayAvatarURL() });
+
+				// Call the deploy function
+				try {
+					const result = await Commands.reloadCommand(commandName, interaction);
+
+					reloadEmbed.setDescription(result);
+					await interaction.editReply({ embeds: [reloadEmbed], ephemeral: true });
+				} catch (error) {
+					reloadEmbed.setDescription(`Failed to reload command: **${commandName}**\nError: ${error.message}`);
+					await interaction.editReply({ embeds: [reloadEmbed], ephemeral: true });
+				}
 			}
 		}
 	},
