@@ -189,7 +189,7 @@ export async function reloadCommand(commandName, interaction) {
 			replyMessage = 'No commands found to reload.';
 		}
 
-		await interaction.editReply(replyMessage);
+		return replyMessage;
     } else {
         throw new Error(`[ERROR] Command "${commandName}" does not exist.`);
     }
