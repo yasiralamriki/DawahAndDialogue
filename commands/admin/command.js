@@ -62,6 +62,8 @@ export default {
 						.setRequired(true))
 		),
 	async execute(interaction) {
+		await interaction.deferReply({ ephemeral: true }); // Defer the reply to allow time for command processing
+
 		// Check if the user is an admin
 		if (!config.admins.includes(interaction.user.id)) {
 			await interaction.editReply({ content: 'You are not authorized to use this command.', ephemeral: true });
@@ -75,11 +77,9 @@ export default {
 		if (subcommand === 'enable' || subcommand === 'disable') {
 			if (Commands.getCommandByName(commandName) === null) {
 				// If the command does not exist, send an error message
-				await interaction.reply({ content: `The command **${commandName}** does not exist.`, ephemeral: true });
+				await interaction.editReply({ content: `The command **${commandName}** does not exist.`, ephemeral: true });
 				return;
 			} else {
-				await interaction.deferReply({ ephemeral: true }); // Defer the reply to allow time for command processing
-
 				// Create an embed with the user's avatar
 				const commandEmbed = new EmbedBuilder()
 					.setColor(config.colors.primary) // Set the embed color from the config file
