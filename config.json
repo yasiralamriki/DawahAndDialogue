@@ -56,6 +56,10 @@
         "command": {
             "enabled": true,
             "module": "admin"
+        },
+        "date": {
+            "enabled": true,
+            "module": "utility"
         }
     },
     "admins": [
