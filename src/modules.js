@@ -144,8 +144,16 @@ export function enableModule(moduleName) {
     if (module) {
         module.enabled = true;
         config.modules[module.name] = true;
+        
+        // Enable all commands in this module
+        for (const commandName in config.commands) {
+            if (config.commands[commandName].module === moduleName) {
+                config.commands[commandName].enabled = true;
+            }
+        }
+        
         saveConfig();
-        return `[INFO] Module "${moduleName}" has been enabled.`;
+        return `[INFO] Module "${moduleName}" and its commands have been enabled.`;
     } else {
         throw new Error(`[ERROR] Module "${moduleName}" does not exist.`);
     }
@@ -156,8 +164,16 @@ export function disableModule(moduleName) {
     if (module) {
         module.enabled = false;
         config.modules[module.name] = false;
+        
+        // Disable all commands in this module
+        for (const commandName in config.commands) {
+            if (config.commands[commandName].module === moduleName) {
+                config.commands[commandName].enabled = false;
+            }
+        }
+        
         saveConfig();
-        return `[INFO] Module "${moduleName}" has been disabled.`;
+        return `[INFO] Module "${moduleName}" and its commands have been disabled.`;
     } else {
         throw new Error(`[ERROR] Module "${moduleName}" does not exist.`);
     }

@@ -34,7 +34,7 @@
             "module": "islamic"
         },
         "avatar": {
-            "enabled": false,
+            "enabled": true,
             "module": "utility"
         },
         "remind": {

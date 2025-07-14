@@ -10,6 +10,7 @@ import config from '../../config.json' with { type: 'json' }; // Import the conf
 import path from 'node:path'; // Import the path module for file paths
 import { fileURLToPath } from 'node:url'; // Import for __dirname fix
 import { Modules } from '../../src/modules.js'; // Import the Modules class for module management
+import { Commands } from '../../src/commands.js'; // Import the Commands class for command management
 
 // Fix __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url);
