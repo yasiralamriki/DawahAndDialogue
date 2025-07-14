@@ -7,6 +7,8 @@
 
 import { SlashCommandBuilder, EmbedBuilder } from 'discord.js'; // Import necessary classes from discord.js
 import config from '../../config.json' with { type: 'json' }; // Import the config file
+import { Modules } from '../../src/modules.js'; // Import the Modules class for module management
+import { Commands } from '../../src/commands.js'; // Import the Commands class for command management
 import packageJson from '../../package.json' with { type: 'json' }; // Import the package.json file
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
@@ -40,8 +42,8 @@ export default {
 				{ name: 'Discord.js Version', value: `\`${version}\``, inline: true },
 				{ name: 'Guild Count', value: `\`${interaction.client.guilds.cache.size}\``, inline: true },
 				{ name: 'User Count', value: `\`${interaction.client.users.cache.size}\``, inline: true },
-				{ name: 'Modules Loaded', value: `\`${Object.values(config.modules).filter(Boolean).length} / ${Object.keys(config.modules).length}\``, inline: true },
-				{ name: 'Commands Loaded', value: `\`${Object.values(config.commands).filter(Boolean).length} / ${Object.keys(config.commands).length}\``, inline: true },
+				{ name: 'Modules Loaded', value: `\`${Modules.getEnabledModuleCount()} / ${Modules.getModuleCount()}\``, inline: true },
+				{ name: 'Commands Loaded', value: `\`${Commands.getEnabledCommandsCount()} / ${Commands.getCommandCount()}\``, inline: true },
 			])
 			.setThumbnail(interaction.client.user.displayAvatarURL())
 			.setTimestamp()

@@ -50,6 +50,14 @@ export function getCommands() {
     return config.commands;
 }
 
+export function getCommandCount() {
+    return Object.keys(config.commands).length;
+}
+
+export function getEnabledCommandsCount() {
+    return Object.values(config.commands).filter(cmd => cmd.enabled === true).length;
+}
+
 export function getCommandByName(name) {
     const entry = config.commands[name];
     if (entry === undefined) return null;
@@ -221,6 +229,8 @@ export const Commands = {
     Command,
     createCommand,
     getCommands,
+    getCommandCount,
+    getEnabledCommandsCount,
     getCommandByName,
     deployCommand,
     reloadCommand,

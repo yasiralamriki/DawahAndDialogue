@@ -9,7 +9,6 @@ import { SlashCommandBuilder, EmbedBuilder } from 'discord.js'; // Import necess
 import config from '../../config.json' with { type: 'json' }; // Import the config file for colors and other settings
 import path from 'node:path'; // Import the path module for file paths
 import { fileURLToPath } from 'node:url'; // Import for __dirname fix
-import { Modules } from '../../src/modules.js'; // Import the Modules class for module management
 import { Commands } from '../../src/commands.js';
 
 // Fix __dirname for ES modules

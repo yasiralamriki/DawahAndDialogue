@@ -41,6 +41,14 @@ export function getModules() {
     return config.modules;
 }
 
+export function getModuleCount() {
+    return Object.keys(config.modules).length;
+}
+
+export function getEnabledModuleCount() {
+    return Object.values(config.modules).filter(Boolean).length;
+}
+
 export function getModuleByName(name) {
     return config.modules[name] !== undefined ? { name, enabled: !!config.modules[name] } : null;
 }
@@ -159,6 +167,8 @@ export const Modules = {
     Module,
     createModule,
     getModules,
+    getModuleCount,
+    getEnabledModuleCount,
     getModuleByName,
     deployModule,
     reloadModule,
