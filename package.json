@@ -19,6 +19,7 @@
     "@calidy/dayjs-calendarsystems": "^1.11.3",
     "@google/genai": "^1.7.0",
     "@google/generative-ai": "^0.24.1",
+    "@octokit/rest": "^22.0.0",
     "axios": "^1.10.0",
     "dayjs": "^1.11.13",
     "dayjs-plugin-utc": "^0.1.2",

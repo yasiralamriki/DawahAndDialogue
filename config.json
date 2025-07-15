@@ -60,6 +60,10 @@
         "date": {
             "enabled": true,
             "module": "utility"
+        },
+        "changelog": {
+            "enabled": true,
+            "module": "bot"
         }
     },
     "admins": [
