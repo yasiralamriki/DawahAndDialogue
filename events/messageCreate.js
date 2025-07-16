@@ -33,17 +33,27 @@ export default {
         const phrases = [
             { phrase: 'aswrwb', response_ar: 'السلام عليكم ورحمة الله وبركاته', response_en: 'May the peace, blessings and mercy of Allah be upon you.' },
             { phrase: 'aswr', response_ar: 'السلام عليكم ورحمة الله', response_en: 'May the peace and mercy of Allah be upon you.' },
-            { phrase: 'as', response_ar: 'السلام عليكم', response_en: 'May peace be upon you.' },
+            { phrase: ['as', 'salam', 'salam alaikum'], response_ar: 'السلام عليكم', response_en: 'May peace be upon you.' },
             { phrase: 'wswrwb', response_ar: 'وعليكم السلام ورحمة الله وبركاته', response_en: 'And may the peace, blessings and mercy of Allah be upon you.' },
             { phrase: 'wswr', response_ar: 'وعليكم السلام ورحمة الله', response_en: 'And may the peace and mercy of Allah be upon you.' },
             { phrase: 'ws', response_ar: 'وعليكم السلام', response_en: 'And may peace be upon you.' },
-            { phrase: 'jzk', response_ar: 'جزاك الله خيراً', response_en: 'May Allah reward you with goodness.' },
+            { phrase: ['jzk', 'jazakallah'], response_ar: 'جزاك الله خيراً', response_en: 'May Allah reward you with goodness.' },
         ];
 
         const content = message.content.trim().toLowerCase();
 
         for (const phrase of phrases) {
-            if (content === phrase.phrase) {
+            if (Array.isArray(phrase.phrase)) {
+                // Check if content matches any of the phrases in the array
+                if (phrase.phrase.some(p => content.includes(p))) {
+                    const phraseEmbed = new EmbedBuilder()
+                        .setColor(config.colors.primary)
+                        .setDescription(phrase.response_en)
+                        .setTimestamp();
+
+                    await message.reply({ content: `${message.author} says ${phrase.response_ar}`, embeds: [phraseEmbed] });
+                }
+            } else if (content.includes(phrase.phrase)) {
                 const phraseEmbed = new EmbedBuilder()
                     .setColor(config.colors.primary)
                     .setDescription(phrase.response_en)
