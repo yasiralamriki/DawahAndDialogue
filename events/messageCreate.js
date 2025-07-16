@@ -45,7 +45,7 @@ export default {
         for (const phrase of phrases) {
             if (Array.isArray(phrase.phrase)) {
                 // Check if content matches any of the phrases in the array
-                if (phrase.phrase.some(p => content.includes(p))) {
+                if (phrase.phrase.some(p => content === p)) {
                     const phraseEmbed = new EmbedBuilder()
                         .setColor(config.colors.primary)
                         .setDescription(phrase.response_en)
@@ -53,7 +53,7 @@ export default {
 
                     await message.reply({ content: `${message.author} says ${phrase.response_ar}`, embeds: [phraseEmbed] });
                 }
-            } else if (content.includes(phrase.phrase)) {
+            } else if (content === phrase.phrase) {
                 const phraseEmbed = new EmbedBuilder()
                     .setColor(config.colors.primary)
                     .setDescription(phrase.response_en)
