@@ -76,7 +76,14 @@ export default {
 		if (subcommand === 'enable' || subcommand === 'disable') {
 			if (Commands.getCommandByName(commandName) === null) {
 				// If the command does not exist, send an error message
-				await interaction.editReply({ content: `The command **${commandName}** does not exist.`, ephemeral: true });
+				const errorEmbed = new EmbedBuilder()
+					.setColor(config.colors.primary) // Set the embed color from the config file
+					.setTitle(`${subcommand === 'enable' ? 'Enable' : 'Disable'} Command: ${commandName}`)
+					.setDescription(`The command **${commandName}** does not exist. Please check the command name and try again.`)
+					.setTimestamp()
+					.setFooter({ text: 'Salafi Bot', iconURL: interaction.client.user.displayAvatarURL() });
+
+				await interaction.editReply({ embeds: [errorEmbed], ephemeral: true });
 				return;
 			} else {
 				// Create an embed with the user's avatar
@@ -91,18 +98,34 @@ export default {
 				if (subcommand === 'enable') {
 					// Check if the command is already enabled
 					if (Commands.getCommandByName(commandName) && Commands.getCommandByName(commandName).enabled === true) {
-						commandEmbed.setDescription(`The command **${commandName}** is already enabled.`);
+						commandEmbed.setDescription(`[ERROR] The command **${commandName}** is already enabled.`);
 					} else {
-						Commands.enableCommand(commandName); // Enable the command
-						commandEmbed.setDescription(`The command **${commandName}** has been enabled.`);
+						// Enable the command
+						try {
+							const result = Commands.enableCommand(commandName);
+
+							commandEmbed.setDescription(result);
+							await interaction.editReply({ embeds: [commandEmbed], ephemeral: true });
+						} catch (error) {
+							commandEmbed.setDescription(`[ERROR] Failed to enable command: **${commandName}**\n${error.message}`);
+							await interaction.editReply({ embeds: [commandEmbed], ephemeral: true });
+						}
 					}
 				} else if (subcommand === 'disable') {
 					// Check if the command is already disabled
 					if (Commands.getCommandByName(commandName) && Commands.getCommandByName(commandName).enabled === false) {
-						commandEmbed.setDescription(`The command **${commandName}** is already disabled.`);
+						commandEmbed.setDescription(`[ERROR] The command **${commandName}** is already disabled.`);
 					} else {
-						Commands.disableCommand(commandName); // Disable the command
-						commandEmbed.setDescription(`The command **${commandName}** has been disabled.`);
+						// Disable the command
+						try {
+							const result = Commands.disableCommand(commandName);
+
+							commandEmbed.setDescription(result);
+							await interaction.editReply({ embeds: [commandEmbed], ephemeral: true });
+						} catch (error) {
+							commandEmbed.setDescription(`[ERROR] Failed to disable command: **${commandName}**\n${error.message}`);
+							await interaction.editReply({ embeds: [commandEmbed], ephemeral: true });
+						}
 					}
 				}
 				
@@ -126,7 +149,7 @@ export default {
 					resultEmbed.setDescription(result);
 					await interaction.editReply({ embeds: [resultEmbed], ephemeral: true });
 				} catch (error) {
-					resultEmbed.setDescription(`Failed to deploy command: **${commandName}**\nError: ${error.message}`);
+					resultEmbed.setDescription(`[ERROR] Failed to deploy command: **${commandName}**\n${error.message}`);
 					await interaction.editReply({ embeds: [resultEmbed], ephemeral: true });
 				}
 			} else if (subcommand === 'reload') {
@@ -145,7 +168,7 @@ export default {
 					reloadEmbed.setDescription(result);
 					await interaction.editReply({ embeds: [reloadEmbed], ephemeral: true });
 				} catch (error) {
-					reloadEmbed.setDescription(`Failed to reload command: **${commandName}**\nError: ${error.message}`);
+					reloadEmbed.setDescription(`[ERROR] Failed to reload command: **${commandName}**\n${error.message}`);
 					await interaction.editReply({ embeds: [reloadEmbed], ephemeral: true });
 				}
 			}

@@ -77,7 +77,14 @@ export default {
 		if (subcommand === 'enable' || subcommand === 'disable') {
 			if (Modules.getModuleByName(moduleName) === null) {
 				// If the module does not exist, send an error message
-				await interaction.editReply({ content: `The module **${moduleName}** does not exist.` });
+				const errorEmbed = new EmbedBuilder()
+					.setColor(config.colors.primary) // Set the embed color from the config file
+					.setTitle(`${subcommand === 'enable' ? 'Enable' : 'Disable'} Module: ${moduleName}`)
+					.setDescription(`The module **${moduleName}** does not exist. Please check the module name and try again.`)
+					.setTimestamp()
+					.setFooter({ text: 'Salafi Bot', iconURL: interaction.client.user.displayAvatarURL() });
+
+				await interaction.editReply({ embeds: [errorEmbed], ephemeral: true });
 				return;
 			} else {
 				// Create an embed with the user's avatar
@@ -92,18 +99,34 @@ export default {
 				if (subcommand === 'enable') {
 					// Check if the module is already enabled
 					if (Modules.getModuleByName(moduleName) && Modules.getModuleByName(moduleName).enabled === true) {
-						moduleEmbed.setDescription(`The module **${moduleName}** is already enabled.`);
+						moduleEmbed.setDescription(`[ERROR] The module **${moduleName}** is already enabled.`);
 					} else {
-						Modules.enableModule(moduleName); // Enable the module
-						moduleEmbed.setDescription(`The module **${moduleName}** has been enabled.`);
+						// Call the enable function
+						try {
+							const result = Modules.enableModule(moduleName);
+
+							resultEmbed.setDescription(result);
+							await interaction.editReply({ embeds: [resultEmbed], ephemeral: true });
+						} catch (error) {
+							resultEmbed.setDescription(`[ERROR] Failed to enable module: **${moduleName}**\n${error.message}`);
+							await interaction.editReply({ embeds: [resultEmbed], ephemeral: true });
+						}
 					}
 				} else if (subcommand === 'disable') {
 					// Check if the module is already disabled
 					if (Modules.getModuleByName(moduleName) && Modules.getModuleByName(moduleName).enabled === false) {
-						moduleEmbed.setDescription(`The module **${moduleName}** is already disabled.`);
+						moduleEmbed.setDescription(`[ERROR] The module **${moduleName}** is already disabled.`);
 					} else {
-						Modules.disableModule(moduleName); // Disable the module
-						moduleEmbed.setDescription(`The module **${moduleName}** has been disabled.`);
+						// Call the disable function
+						try {
+							const result = Modules.disableModule(moduleName);
+
+							resultEmbed.setDescription(result);
+							await interaction.editReply({ embeds: [resultEmbed], ephemeral: true });
+						} catch (error) {
+							resultEmbed.setDescription(`[ERROR] Failed to disable module: **${moduleName}**\n${error.message}`);
+							await interaction.editReply({ embeds: [resultEmbed], ephemeral: true });
+						}
 					}
 				}
 				
@@ -127,7 +150,7 @@ export default {
 					resultEmbed.setDescription(result);
 					await interaction.editReply({ embeds: [resultEmbed], ephemeral: true });
 				} catch (error) {
-					resultEmbed.setDescription(`Failed to deploy module: **${moduleName}**\nError: ${error.message}`);
+					resultEmbed.setDescription(`[ERROR] Failed to deploy module: **${moduleName}**\n${error.message}`);
 					await interaction.editReply({ embeds: [resultEmbed], ephemeral: true });
 				}
 			} else if (subcommand === 'reload') {
@@ -146,7 +169,7 @@ export default {
 					reloadEmbed.setDescription(result);
 					await interaction.editReply({ embeds: [reloadEmbed], ephemeral: true });
 				} catch (error) {
-					reloadEmbed.setDescription(`Failed to reload module: **${moduleName}**\nError: ${error.message}`);
+					reloadEmbed.setDescription(`[ERROR] Failed to reload module: **${moduleName}**\n${error.message}`);
 					await interaction.editReply({ embeds: [reloadEmbed], ephemeral: true });
 				}
 			}
