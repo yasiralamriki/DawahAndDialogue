@@ -6,7 +6,7 @@
 */
 
 import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenAI  } from '@google/genai';
 import config from '../../config.json' with { type: 'json' };
 import dotenv from 'dotenv';
 
@@ -14,7 +14,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 const geminiAPIKey = process.env.GEMINI_API_KEY;
 
-const genAI = new GoogleGenerativeAI(geminiAPIKey);
+const genAI = new GoogleGenAI( { apiKey: geminiAPIKey } );
 
 export default {
 	data: new SlashCommandBuilder()
@@ -35,7 +35,7 @@ export default {
 				.setRequired(false)
 				.addChoices(
 					{ name: 'Gemma 3n E2B', value: 'gemma-3n-e2b-it' },
-					{ name: 'Gemma 3n E4b', value: 'gemma-3n-e4b-it' },
+					{ name: 'Gemma 3n E4B', value: 'gemma-3n-e4b-it' },
 					{ name: 'Gemma 3 1B', value: 'gemma-3-1b-it' },
 					{ name: 'Gemma 3 4B', value: 'gemma-3-4b-it' },
 					{ name: 'Gemma 3 12B', value: 'gemma-3-12b-it' },
@@ -63,12 +63,14 @@ export default {
 		await interaction.reply({ embeds: [translationEmbed] });
 
 		try {
-			const model = genAI.getGenerativeModel({ model: modelName });
-			const result = await model.generateContent(`Translate the following text into ${language}: ${text}.`);
-			const response = await result.response;
-			const translatedText = response.text();
+			const response = await genAI.models.generateContent({
+				model: modelName,
+				contents: `Translate the following text into ${language}: ${text}.`,
+			});
 
-			translationEmbed.setDescription(translatedText);
+			const result = response.text;
+
+			translationEmbed.setDescription(result);
 			await interaction.editReply({ embeds: [translationEmbed] });
 		} catch (error) {
 			console.error('Translation error:', error);
