@@ -9,6 +9,7 @@ import { SlashCommandBuilder, EmbedBuilder } from 'discord.js'; // Import necess
 import config from '../../config.json' with { type: 'json' }; // Import the config file
 import { Modules } from '../../src/modules.js'; // Import the Modules class for module management
 import { Commands } from '../../src/commands.js'; // Import the Commands class for command management
+import { Util } from '../../src/util.js'; // Import utility functions
 import packageJson from '../../package.json' with { type: 'json' }; // Import the package.json file
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
@@ -44,6 +45,8 @@ export default {
 				{ name: 'User Count', value: `\`${interaction.client.users.cache.size}\``, inline: true },
 				{ name: 'Modules Loaded', value: `\`${Modules.getEnabledModuleCount()} / ${Modules.getModuleCount()}\``, inline: true },
 				{ name: 'Commands Loaded', value: `\`${Commands.getEnabledCommandsCount()} / ${Commands.getCommandCount()}\``, inline: true },
+				{ name: 'JavaScript Files Count', value: `\`${await Util.getJavascriptFileCount()}\``, inline: true },
+				{ name: 'Lines of Code', value: `\`${Util.getLinesOfCodeCount()}\``, inline: true },
 			])
 			.setThumbnail(interaction.client.user.displayAvatarURL())
 			.setTimestamp()
