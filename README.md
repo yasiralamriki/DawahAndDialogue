@@ -30,6 +30,7 @@ GEMINI_API_KEY=YOUR_GEMINI_API_KEY # Get API Key at https://console.cloud.google
 2. run `node .` or `node index.js`
 
 ### Option 2: Use already hosted version of this bot
+
 This bot is being hosted on Google Cloud, and it will automatically pull the repo every 5 minutes to update, you can add it [here](https://discord.com/oauth2/authorize?client_id=1386650006118858853)
 
 ---
