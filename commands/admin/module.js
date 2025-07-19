@@ -60,6 +60,15 @@ export default {
 					option.setName('module')
 						.setDescription('The name of the module to reload')
 						.setRequired(true))
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('info')
+				.setDescription('Get information about a bot module')
+				.addStringOption(option =>
+					option.setName('module')
+						.setDescription('The name of the module to get information about')
+						.setRequired(true))
 		),
 	async execute(interaction) {
 		// Check if the user is an admin
@@ -171,6 +180,35 @@ export default {
 				} catch (error) {
 					reloadEmbed.setDescription(`[ERROR] Failed to reload module: **${moduleName}**\n${error.message}`);
 					await interaction.editReply({ embeds: [reloadEmbed], ephemeral: true });
+				}
+			}
+		} else if (subcommand === 'info') {
+			// Get the command information
+			const moduleInfoEmbed = new EmbedBuilder()
+				.setColor(config.colors.primary)
+				.setTitle(`Module Information: ${moduleName}`)
+				.setTimestamp()
+				.setFooter({ text: 'Salafi Bot', iconURL: interaction.client.user.displayAvatarURL() });
+
+			if (Modules.getModuleByName(moduleName) === null) {
+				moduleInfoEmbed.setDescription(`[ERROR] The module **${moduleName}** does not exist.`);
+				await interaction.editReply({ embeds: [moduleInfoEmbed], ephemeral: true });
+			} else {
+				// Get module info
+				try {
+					const module = Modules.getModuleByName(moduleName);
+					const commands = Modules.getCommandsByModule(moduleName);
+
+					moduleInfoEmbed.addFields(
+						{ name: 'Name', value: module.name, inline: false },
+						{ name: 'Enabled', value: module.enabled ? 'Yes' : 'No', inline: false },
+						{ name: 'Commands', value: commands.length > 0 ? commands.map(cmd => cmd.name).join(', ') : 'No commands available', inline: false },
+					);
+					await interaction.editReply({ embeds: [moduleInfoEmbed], ephemeral: true });
+				} catch (error) {
+					console.error('[ERROR] Module info error:', error); // Add logging for debugging
+					moduleInfoEmbed.setDescription(`[ERROR] Failed to get info of module: **${moduleName}**\n${error.message}`);
+					await interaction.editReply({ embeds: [moduleInfoEmbed], ephemeral: true });
 				}
 			}
 		}

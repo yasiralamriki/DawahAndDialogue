@@ -221,7 +221,7 @@ export default {
 					);
 					await interaction.editReply({ embeds: [commandInfoEmbed], ephemeral: true });
 				} catch (error) {
-					console.error('Command info error:', error); // Add logging for debugging
+					console.error('[ERROR] Command info error:', error); // Add logging for debugging
 					commandInfoEmbed.setDescription(`[ERROR] Failed to get info of command: **${commandName}**\n${error.message}`);
 					await interaction.editReply({ embeds: [commandInfoEmbed], ephemeral: true });
 				}

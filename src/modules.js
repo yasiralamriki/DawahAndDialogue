@@ -53,6 +53,12 @@ export function getModuleByName(name) {
     return config.modules[name] !== undefined ? { name, enabled: !!config.modules[name] } : null;
 }
 
+export function getCommandsByModule(moduleName) {
+    return Object.entries(config.commands)
+        .filter(([_, command]) => command.module === moduleName)
+        .map(([name, command]) => ({ name, ...command }));
+}
+
 export async function deployModule(moduleName, globally = false) {
     const module = getModuleByName(moduleName);
     if (!module) {
@@ -186,6 +192,7 @@ export const Modules = {
     getModuleCount,
     getEnabledModuleCount,
     getModuleByName,
+    getCommandsByModule,
     deployModule,
     reloadModule,
     enableModule,

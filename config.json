@@ -9,15 +9,7 @@
         "utility": true
     },
     "commands": {
-        "deploycommand": {
-            "enabled": true,
-            "module": "admin"
-        },
         "module": {
-            "enabled": true,
-            "module": "admin"
-        },
-        "reloadcommands": {
             "enabled": true,
             "module": "admin"
         },
