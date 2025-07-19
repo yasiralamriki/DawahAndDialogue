@@ -30,8 +30,7 @@ GEMINI_API_KEY=YOUR_GEMINI_API_KEY # Get API Key at https://console.cloud.google
 2. run `node .` or `node index.js`
 
 ### Option 2: Use already hosted version of this bot
-This bot is being hosted on Google Cloud, and it will automatically pull the repo every 5 minutes to update
-You can add it [here](https://discord.com/oauth2/authorize?client_id=1386650006118858853)
+This bot is being hosted on Google Cloud, and it will automatically pull the repo every 5 minutes to update, you can add it [here](https://discord.com/oauth2/authorize?client_id=1386650006118858853)
 
 ---
 
@@ -40,7 +39,7 @@ You can add it [here](https://discord.com/oauth2/authorize?client_id=13866500061
 > *"Indeed, actions are judged by intentions..."*  
 > — [Ṣaḥīḥ al-Bukhārī, 1]
 
-This project is a means of cooperation upon al-birr wa at-taqwā, and not upon falsehood or innovation.
+This project is a means of cooperation upon Birr and Taqwā, and not upon falsehood or innovation.
 
 ---
 
