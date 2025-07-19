@@ -59,6 +59,15 @@ export default {
 					option.setName('command')
 						.setDescription('The name of the command to reload')
 						.setRequired(true))
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('info')
+				.setDescription('Get information about a bot command')
+				.addStringOption(option =>
+					option.setName('command')
+						.setDescription('The name of the command to get information about')
+						.setRequired(true))
 		),
 	async execute(interaction) {
 		await interaction.deferReply({ ephemeral: true }); // Defer the reply to allow time for command processing
@@ -170,6 +179,51 @@ export default {
 				} catch (error) {
 					reloadEmbed.setDescription(`[ERROR] Failed to reload command: **${commandName}**\n${error.message}`);
 					await interaction.editReply({ embeds: [reloadEmbed], ephemeral: true });
+				}
+			}
+		} else if (subcommand === 'info') {
+			// Get the command information
+			const commandInfoEmbed = new EmbedBuilder()
+				.setColor(config.colors.primary)
+				.setTitle(`Command Information: ${commandName}`)
+				.setTimestamp()
+				.setFooter({ text: 'Salafi Bot', iconURL: interaction.client.user.displayAvatarURL() });
+
+			// Check if the command exists
+			if (Commands.getCommandByName(commandName) === null) {
+				commandInfoEmbed.setDescription(`[ERROR] The command **${commandName}** does not exist.`);
+				await interaction.editReply({ embeds: [commandInfoEmbed], ephemeral: true });
+			} else {
+				// Get command info
+				try {
+					const command = Commands.getCommandByName(commandName);
+					
+					// Fix 1: Add better path handling and validation
+					const commandFilePath = path.resolve(__dirname, `../${command.module}/${command.name}.js`);
+					
+					// Check if file exists before importing
+					const fs = await import('node:fs');
+					if (!fs.existsSync(commandFilePath)) {
+						throw new Error(`Command file not found at: ${commandFilePath}`);
+					}
+					
+					// Fix 2: Use proper URL construction for Windows
+					const fileURL = new URL(`file:///${commandFilePath.replace(/\\/g, '/')}`).href;
+					
+					// Fix 3: Add cache busting to ensure fresh import
+					const commandModule = await import(`${fileURL}?t=${Date.now()}`);
+
+					commandInfoEmbed.addFields(
+						{ name: 'Name', value: command.name, inline: false },
+						{ name: 'Description', value: commandModule.default?.data?.description || 'No description available', inline: false },
+						{ name: 'Module', value: command.module || 'No module specified', inline: false },
+						{ name: 'Enabled', value: command.enabled ? 'Yes' : 'No', inline: false },
+					);
+					await interaction.editReply({ embeds: [commandInfoEmbed], ephemeral: true });
+				} catch (error) {
+					console.error('Command info error:', error); // Add logging for debugging
+					commandInfoEmbed.setDescription(`[ERROR] Failed to get info of command: **${commandName}**\n${error.message}`);
+					await interaction.editReply({ embeds: [commandInfoEmbed], ephemeral: true });
 				}
 			}
 		}
