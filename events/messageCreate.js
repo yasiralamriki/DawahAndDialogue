@@ -31,12 +31,10 @@ export default {
         }
 
         const phrases = [
-            { phrase: 'aswrwb', response_ar: 'السلام عليكم ورحمة الله وبركاته', response_en: 'May the peace, blessings and mercy of Allah be upon you.' },
+            { phrase: ['aswrwb', 'as', 'salam', 'salam alaikum'], response_ar: 'السلام عليكم ورحمة الله وبركاته', response_en: 'May the peace, blessings and mercy of Allah be upon you.' },
             { phrase: 'aswr', response_ar: 'السلام عليكم ورحمة الله', response_en: 'May the peace and mercy of Allah be upon you.' },
-            { phrase: ['as', 'salam', 'salam alaikum'], response_ar: 'السلام عليكم', response_en: 'May peace be upon you.' },
-            { phrase: 'wswrwb', response_ar: 'وعليكم السلام ورحمة الله وبركاته', response_en: 'And may the peace, blessings and mercy of Allah be upon you.' },
+            { phrase: ['wswrwb', 'ws'], response_ar: 'وعليكم السلام ورحمة الله وبركاته', response_en: 'And may the peace, blessings and mercy of Allah be upon you.' },
             { phrase: 'wswr', response_ar: 'وعليكم السلام ورحمة الله', response_en: 'And may the peace and mercy of Allah be upon you.' },
-            { phrase: 'ws', response_ar: 'وعليكم السلام', response_en: 'And may peace be upon you.' },
             { phrase: ['jzk', 'jazakallah'], response_ar: 'جزاك الله خيراً', response_en: 'May Allah reward you with goodness.' },
         ];
 
