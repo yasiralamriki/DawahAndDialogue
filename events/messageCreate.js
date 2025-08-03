@@ -35,7 +35,7 @@ export default {
             { phrase: 'aswr', response_ar: 'السلام عليكم ورحمة الله', response_en: 'May the peace and mercy of Allah be upon you.' },
             { phrase: ['wswrwb', 'ws'], response_ar: 'وعليكم السلام ورحمة الله وبركاته', response_en: 'And may the peace, blessings and mercy of Allah be upon you.' },
             { phrase: 'wswr', response_ar: 'وعليكم السلام ورحمة الله', response_en: 'And may the peace and mercy of Allah be upon you.' },
-            { phrase: ['jzk', 'jazakallah'], response_ar: 'جزاك الله خيراً', response_en: 'May Allah reward you with goodness.' },
+            { phrase: ['jzk', 'jazakallah'], response_ar: 'جزاك الله خيراً', response_en: 'May Allah reward you immensely.' },
         ];
 
         const content = message.content.trim().toLowerCase();
