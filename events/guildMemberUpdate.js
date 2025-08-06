@@ -6,7 +6,7 @@
 */
 
 import { Events } from 'discord.js';
-import config from '../../config.json' with { type: 'json' }; // Import the config file for colors and other settings
+import config from '../config.json' with { type: 'json' }; // Import the config file for colors and other settings
 
 export default {
     name: Events.GuildMemberUpdate,
