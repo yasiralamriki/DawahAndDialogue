@@ -6,11 +6,19 @@
 */
 
 import { SlashCommandBuilder, EmbedBuilder } from 'discord.js'; // Import necessary classes from discord.js
-import config from '../../config.json' with { type: 'json' }; // Import the config file for colors and other settings
 import path from 'node:path'; // Import the path module for file paths
 import { fileURLToPath } from 'node:url'; // Import for __dirname fix
 import { Modules } from '../../src/modules.js'; // Import the Modules class for module management
-import { Commands } from '../../src/commands.js'; // Import the Commands class for command management
+
+// Try to load local config, fallback to default config
+let config;
+try {
+	config = await import('../../config.local.json', { with: { type: 'json' } });
+	config = config.default;
+} catch (e) {
+	config = await import('../../config.json', { with: { type: 'json' } });
+	config = config.default;
+}
 
 // Fix __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url);

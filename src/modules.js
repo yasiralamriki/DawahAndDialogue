@@ -14,7 +14,16 @@ import { Commands } from './commands.js';
 // Fix __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const configPath = path.join(__dirname, '../config.json');
+
+// Try to load local config, fallback to default config
+let configPath;
+try {
+    configPath = path.join(__dirname, '../../config.local.json');
+    configPath = configPath.default;
+} catch (e) {
+    configPath = path.join(__dirname, '../../config.json');
+    configPath = configPath.default;
+}
 
 function saveConfig() {
     fs.writeFileSync(configPath, JSON.stringify(config, null, 4), 'utf-8');

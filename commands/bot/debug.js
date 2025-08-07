@@ -6,13 +6,22 @@
 */
 
 import { SlashCommandBuilder, EmbedBuilder } from 'discord.js'; // Import necessary classes from discord.js
-import config from '../../config.json' with { type: 'json' }; // Import the config file
 import { Modules } from '../../src/modules.js'; // Import the Modules class for module management
 import { Commands } from '../../src/commands.js'; // Import the Commands class for command management
 import { Util } from '../../src/util.js'; // Import utility functions
 import packageJson from '../../package.json' with { type: 'json' }; // Import the package.json file
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
+
+// Try to load local config, fallback to default config
+let config;
+try {
+	config = await import('../../config.local.json', { with: { type: 'json' } });
+	config = config.default;
+} catch (e) {
+	config = await import('../../config.json', { with: { type: 'json' } });
+	config = config.default;
+}
 
 // Extend dayjs with utc plugin
 dayjs.extend(utc);

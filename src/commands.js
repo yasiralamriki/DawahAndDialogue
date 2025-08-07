@@ -5,12 +5,21 @@
     License: MIT
 */
 
-import config from '../config.json' with { type: 'json' };
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
+
+// Try to load local config, fallback to default config
+let config;
+try {
+	config = await import('../config.local.json', { with: { type: 'json' } });
+	config = config.default;
+} catch (e) {
+	config = await import('../config.json', { with: { type: 'json' } });
+	config = config.default;
+}
 
 // Import environment variables
 import dotenv from 'dotenv';
@@ -22,7 +31,18 @@ const guildId = process.env.GUILD_ID;
 // Fix __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const configPath = path.join(__dirname, '../config.json');
+
+// Determine config file path
+let configPath;
+try {
+	configPath = path.join(__dirname, '../config.local.json');
+	// Check if local config exists
+	if (!fs.existsSync(configPath)) {
+		throw new Error('Local config not found');
+	}
+} catch (e) {
+	configPath = path.join(__dirname, '../config.json');
+}
 
 function saveConfig() {
     fs.writeFileSync(configPath, JSON.stringify(config, null, 4), 'utf-8');

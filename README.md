@@ -29,6 +29,59 @@ GEMINI_API_KEY=YOUR_GEMINI_API_KEY # Get API Key at https://console.cloud.google
 
 2. run `node .` or `node index.js`
 
+### Configuration Files
+
+The bot uses two configuration files to manage its behavior:
+
+- **`config.json`** - The main configuration file with default settings
+- **`config.local.json`** - Local overrides for development/testing (optional)
+
+When both files are present, `config.local.json` will override settings from `config.json`. This allows you to maintain different configurations for development without modifying the main config file.
+
+#### Configuration Structure
+
+```json
+{
+    "colors": {
+        "primary": "#ffffff"  // Primary color for embeds
+    },
+    "modules": {
+        "admin": true,        // Enable/disable admin module
+        "bot": true,          // Enable/disable bot utilities
+        "islamic": true,      // Enable/disable Islamic commands
+        "utility": true       // Enable/disable utility commands
+    },
+    "commands": {
+        // Individual command settings
+        "commandName": {
+            "enabled": true,  // Whether the command is enabled
+            "module": "moduleName"  // Which module it belongs to
+        }
+    },
+    "admins": [
+        "USER_ID_HERE"       // Discord user IDs with admin privileges
+    ],
+    "bannedEmojis": [
+        // Array of emoji that will be automatically deleted
+    ]
+}
+```
+
+#### Using config.local.json
+
+Create a `config.local.json` file in the root directory to override specific settings for local development:
+
+```json
+{
+    "colors": {
+        "primary": "#FF0000"  // Use red color for development
+    },
+    "admins": [
+        "YOUR_DISCORD_ID"     // Add your Discord ID for testing
+    ]
+}
+```
+
 ### Option 2: Use already hosted version of this bot
 
 This bot is being hosted on Google Cloud, and it will automatically pull the repo every 5 minutes to update, you can add it [here](https://discord.com/oauth2/authorize?client_id=1386650006118858853)

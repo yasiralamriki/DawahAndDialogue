@@ -6,8 +6,17 @@
 */
 
 import { ButtonBuilder, ButtonStyle, ActionRowBuilder, ComponentType, SlashCommandBuilder, EmbedBuilder } from 'discord.js'; // Import necessary classes from discord.js
-import config from '../../config.json' with { type: 'json' }; // Import the config file
 import { Octokit } from "@octokit/rest";
+
+// Try to load local config, fallback to default config
+let config;
+try {
+	config = await import('../../config.local.json', { with: { type: 'json' } });
+	config = config.default;
+} catch (e) {
+	config = await import('../../config.json', { with: { type: 'json' } });
+	config = config.default;
+}
 
 export default {
     data: new SlashCommandBuilder()

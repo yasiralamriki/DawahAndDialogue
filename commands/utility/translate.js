@@ -7,8 +7,17 @@
 
 import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import { GoogleGenAI  } from '@google/genai';
-import config from '../../config.json' with { type: 'json' };
 import dotenv from 'dotenv';
+
+// Try to load local config, fallback to default config
+let config;
+try {
+	config = await import('../../config.local.json', { with: { type: 'json' } });
+	config = config.default;
+} catch (e) {
+	config = await import('../../config.json', { with: { type: 'json' } });
+	config = config.default;
+}
 
 // Load environment variables from .env file
 dotenv.config();
