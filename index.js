@@ -93,18 +93,32 @@ const eventsPath = path.join(__dirname, 'events');
 const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'));
 
 for (const file of eventFiles) {
-    if (file !== 'local') {
-        const filePath = path.join(eventsPath, file);
-        const fileURL = pathToFileURL(filePath).href; // Convert to file URL
-        const event = await import(fileURL); // Use file URL for import
+    const filePath = path.join(eventsPath, file);
+    const fileURL = pathToFileURL(filePath).href; // Convert to file URL
+    const event = await import(fileURL); // Use file URL for import
 
-        if (event.default.once) {
-            client.once(event.default.name, (...args) => event.default.execute(...args));
-        } else {
-            client.on(event.default.name, (...args) => event.default.execute(...args));
-        }
-        console.log(`[INFO] Loaded event: ${event.default.name}`);
+    if (event.default.once) {
+        client.once(event.default.name, (...args) => event.default.execute(...args));
+    } else {
+        client.on(event.default.name, (...args) => event.default.execute(...args));
     }
+    console.log(`[INFO] Loaded event: ${event.default.name}`);
+}
+
+// Load local events
+const localEventFiles = fs.readdirSync(path.join(eventsPath, 'local')).filter(file => file.endsWith('.js'));
+
+for (const file of localEventFiles) {
+    const filePath = path.join(eventsPath, 'local', file);
+    const fileURL = pathToFileURL(filePath).href; // Convert to file URL
+    const event = await import(fileURL); // Use file URL for import
+
+    if (event.default.once) {
+        client.once(event.default.name, (...args) => event.default.execute(...args));
+    } else {
+        client.on(event.default.name, (...args) => event.default.execute(...args));
+    }
+    console.log(`[INFO] Loaded local event: ${event.default.name}`);
 }
 
 // Log in to Discord with your client's token
