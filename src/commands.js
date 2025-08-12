@@ -100,21 +100,52 @@ export async function deployCommand(commandName, globally = false) {
 
     for (const folder of commandFolders) {
         const commandsPath = path.join(foldersPath, folder);
-        const commandFiles = fs
-            .readdirSync(commandsPath)
-            .filter((file) => file.endsWith('.js'));
-        for (const file of commandFiles) {
-            const filePath = path.join(commandsPath, file);
-            const fileURL = pathToFileURL(filePath).href;
-            const commandModule = await import(fileURL);
+        
+        // Handle local commands differently
+        if (folder === 'local') {
+            // For local commands, iterate through subdirectories
+            const subdirs = fs.readdirSync(commandsPath);
+            for (const subdir of subdirs) {
+                const subDirPath = path.join(commandsPath, subdir);
+                if (fs.statSync(subDirPath).isDirectory()) {
+                    const commandFiles = fs
+                        .readdirSync(subDirPath)
+                        .filter((file) => file.endsWith('.js'));
+                    
+                    for (const file of commandFiles) {
+                        const filePath = path.join(subDirPath, file);
+                        const fileURL = pathToFileURL(filePath).href;
+                        const commandModule = await import(fileURL);
 
-            if ('data' in commandModule.default && 'execute' in commandModule.default) {
-                if (commandName && commandModule.default.data.name !== commandName) {
-                    continue;
+                        if ('data' in commandModule.default && 'execute' in commandModule.default) {
+                            if (commandName && commandModule.default.data.name !== commandName) {
+                                continue;
+                            }
+                            commands.push(commandModule.default.data.toJSON());
+                        } else {
+                            throw new Error(`[ERROR] The command at ${filePath} is missing a required "data" or "execute" property.`);
+                        }
+                    }
                 }
-                commands.push(commandModule.default.data.toJSON());
-            } else {
-                throw new Error(`[ERROR] The command at ${filePath} is missing a required "data" or "execute" property.`);
+            }
+        } else {
+            // Handle regular commands
+            const commandFiles = fs
+                .readdirSync(commandsPath)
+                .filter((file) => file.endsWith('.js'));
+            for (const file of commandFiles) {
+                const filePath = path.join(commandsPath, file);
+                const fileURL = pathToFileURL(filePath).href;
+                const commandModule = await import(fileURL);
+
+                if ('data' in commandModule.default && 'execute' in commandModule.default) {
+                    if (commandName && commandModule.default.data.name !== commandName) {
+                        continue;
+                    }
+                    commands.push(commandModule.default.data.toJSON());
+                } else {
+                    throw new Error(`[ERROR] The command at ${filePath} is missing a required "data" or "execute" property.`);
+                }
             }
         }
     }
@@ -166,41 +197,90 @@ export async function reloadCommand(commandName, interaction) {
 
 		// Loop through each folder in the commands directory
 		for (const folder of commandFolders) {
-			// Grab all the command files from the commands directory you created earlier
-			const commandsPath = path.join(foldersPath, folder);
-			const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+			// Handle local commands differently
+			if (folder === 'local') {
+				// For local commands, iterate through subdirectories
+				const localPath = path.join(foldersPath, folder);
+				const subdirs = fs.readdirSync(localPath);
+				
+				for (const subdir of subdirs) {
+					const subDirPath = path.join(localPath, subdir);
+					if (fs.statSync(subDirPath).isDirectory()) {
+						const commandFiles = fs.readdirSync(subDirPath).filter(file => file.endsWith('.js'));
 
-			// Grab the SlashCommandBuilder#toJSON() output of each command's data for deployment
-			for (const file of commandFiles) {
-				// Import the command file
-				// Ensure the file is a valid command file by checking for 'data' and 'execute' properties
-				if (!file.endsWith('.js')) continue; // Skip non-JS files
-				const filePath = path.join(commandsPath, file);
+						// Grab the SlashCommandBuilder#toJSON() output of each command's data for deployment
+						for (const file of commandFiles) {
+							// Import the command file
+							// Ensure the file is a valid command file by checking for 'data' and 'execute' properties
+							if (!file.endsWith('.js')) continue; // Skip non-JS files
+							const filePath = path.join(subDirPath, file);
 
-				try {
-					// Convert file path to file URL for ES6 import
-					const fileURL = pathToFileURL(filePath).href;
+							try {
+								// Convert file path to file URL for ES6 import
+								const fileURL = pathToFileURL(filePath).href;
 
-					// Add cache busting parameter to force reload
-					const cacheBustURL = `${fileURL}?update=${Date.now()}`;
+								// Add cache busting parameter to force reload
+								const cacheBustURL = `${fileURL}?update=${Date.now()}`;
 
-					// Re-import the command file
-					const command = await import(cacheBustURL);
+								// Re-import the command file
+								const command = await import(cacheBustURL);
 
-					if ('data' in command.default && 'execute' in command.default) {
-						// Add module name to command
-                        if (command.default.data.name === commandName) {
-                            command.default.module = folder;
-                            reloadedCommands.push(command.default.data.name);
-                            interaction.client.commands.set(command.default.data.name, command.default);
-                            break;
-                        }
-					} else {
-						failedCommands.push(`${file} - Missing "data" or "execute" property`);
+								if ('data' in command.default && 'execute' in command.default) {
+									// Add module name to command (use subdir name for local commands)
+									if (command.default.data.name === commandName) {
+										command.default.module = subdir;
+										reloadedCommands.push(command.default.data.name);
+										interaction.client.commands.set(command.default.data.name, command.default);
+										break;
+									}
+								} else {
+									failedCommands.push(`${file} - Missing "data" or "execute" property`);
+								}
+							} catch (error) {
+								console.error(error);
+								failedCommands.push(`${file} - ${error.message}`);
+							}
+						}
 					}
-				} catch (error) {
-					console.error(error);
-					failedCommands.push(`${file} - ${error.message}`);
+				}
+			} else {
+				// Handle regular commands
+				// Grab all the command files from the commands directory you created earlier
+				const commandsPath = path.join(foldersPath, folder);
+				const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+
+				// Grab the SlashCommandBuilder#toJSON() output of each command's data for deployment
+				for (const file of commandFiles) {
+					// Import the command file
+					// Ensure the file is a valid command file by checking for 'data' and 'execute' properties
+					if (!file.endsWith('.js')) continue; // Skip non-JS files
+					const filePath = path.join(commandsPath, file);
+
+					try {
+						// Convert file path to file URL for ES6 import
+						const fileURL = pathToFileURL(filePath).href;
+
+						// Add cache busting parameter to force reload
+						const cacheBustURL = `${fileURL}?update=${Date.now()}`;
+
+						// Re-import the command file
+						const command = await import(cacheBustURL);
+
+						if ('data' in command.default && 'execute' in command.default) {
+							// Add module name to command
+							if (command.default.data.name === commandName) {
+								command.default.module = folder;
+								reloadedCommands.push(command.default.data.name);
+								interaction.client.commands.set(command.default.data.name, command.default);
+								break;
+							}
+						} else {
+							failedCommands.push(`${file} - Missing "data" or "execute" property`);
+						}
+					} catch (error) {
+						console.error(error);
+						failedCommands.push(`${file} - ${error.message}`);
+					}
 				}
 			}
 		}
@@ -225,24 +305,32 @@ export async function reloadCommand(commandName, interaction) {
 
 export function enableCommand(commandName) {
     const command = getCommandByName(commandName);
+    if (!command) {
+        throw new Error(`[ERROR] Command "${commandName}" does not exist.`);
+    }
+    
     if (typeof config.commands[command.name] === 'object') {
         config.commands[command.name].enabled = true;
-        return `[INFO] Command "${commandName}" has been enabled.`;
     } else {
         config.commands[command.name] = { enabled: true, module: command.module };
     }
     saveConfig();
+    return `[INFO] Command "${commandName}" has been enabled.`;
 }
 
 export function disableCommand(commandName) {
     const command = getCommandByName(commandName);
+    if (!command) {
+        throw new Error(`[ERROR] Command "${commandName}" does not exist.`);
+    }
+    
     if (typeof config.commands[command.name] === 'object') {
         config.commands[command.name].enabled = false;
-        return `[INFO] Command "${commandName}" has been disabled.`;
     } else {
         config.commands[command.name] = { enabled: false, module: command.module };
     }
     saveConfig();
+    return `[INFO] Command "${commandName}" has been disabled.`;
 }
 
 export const Commands = {

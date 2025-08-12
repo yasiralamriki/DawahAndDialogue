@@ -59,29 +59,66 @@ async function deployCommands() {
 
             if (!fs.lstatSync(commandsPath).isDirectory()) continue;
 
-            const commandFiles = fs
-                .readdirSync(commandsPath)
-                .filter(file => file.endsWith('.js'));
+            // Handle local commands differently
+            if (folder === 'local') {
+                // For local commands, iterate through subdirectories
+                const subdirs = fs.readdirSync(commandsPath);
+                for (const subdir of subdirs) {
+                    const subDirPath = path.join(commandsPath, subdir);
+                    if (fs.statSync(subDirPath).isDirectory()) {
+                        const commandFiles = fs
+                            .readdirSync(subDirPath)
+                            .filter(file => file.endsWith('.js'));
+                        
+                        for (const file of commandFiles) {
+                            const filePath = path.join(subDirPath, file);
+                            
+                            try {
+                                const fileURL = pathToFileURL(filePath).href;
+                                const command = await import(fileURL);
 
-            for (const file of commandFiles) {
-                const filePath = path.join(commandsPath, file);
+                                if ('data' in command.default && 'execute' in command.default) {
+                                    if (specificCommand && command.default.data.name !== specificCommand) {
+                                        continue;
+                                    }
 
-                try {
-                    const fileURL = pathToFileURL(filePath).href;
-                    const command = await import(fileURL);
-
-                    if ('data' in command.default && 'execute' in command.default) {
-                        if (specificCommand && command.default.data.name !== specificCommand) {
-                            continue;
+                                    commands.push(command.default.data.toJSON());
+                                    console.log(`[INFO] Loaded local command: ${command.default.data.name} (from ${subdir})`);
+                                } else {
+                                    console.warn(`[WARN] The local command at ${filePath} is missing a required "data" or "execute" property.`);
+                                }
+                            } catch (error) {
+                                console.error(`[ERROR] Error loading local command ${file}:`, error.message);
+                            }
                         }
-
-                        commands.push(command.default.data.toJSON());
-                        console.log(`[INFO] Loaded command: ${command.default.data.name}`);
-                    } else {
-                        console.warn(`[WARN] The command at ${filePath} is missing a required "data" or "execute" property.`);
                     }
-                } catch (error) {
-                    console.error(`[ERROR] Error loading command ${file}:`, error.message);
+                }
+            } else {
+                // Handle regular commands
+                const commandFiles = fs
+                    .readdirSync(commandsPath)
+                    .filter(file => file.endsWith('.js'));
+
+                for (const file of commandFiles) {
+                    const filePath = path.join(commandsPath, file);
+
+                    try {
+                        const fileURL = pathToFileURL(filePath).href;
+                        const command = await import(fileURL);
+
+                        if ('data' in command.default && 'execute' in command.default) {
+                            if (specificCommand && command.default.data.name !== specificCommand) {
+                                continue;
+                            }
+
+                            commands.push(command.default.data.toJSON());
+                            console.log(`[INFO] Loaded command: ${command.default.data.name}`);
+                        } else {
+                            console.warn(`[WARN] The command at ${filePath} is missing a required "data" or "execute" property.`);
+                        }
+                    } catch (error) {
+                        console.error(`[ERROR] Error loading command ${file}:`, error.message);
+                    }
                 }
             }
         }
@@ -151,17 +188,22 @@ async function deployCommands() {
 
 function showUsage() {
     console.log(`
-Usage: node deploy-commands.js [options]
+Usage: node deploycommands.js [options]
 
 Options:
   --global              Deploy commands globally (takes up to 1 hour to update)
-  --command <name>      Deploy only a specific command by name
+  --command <name>      Deploy only a specific command by name (works with local commands)
 
 Examples:
-  node deploy-commands.js                    # Deploy all commands to guild
-  node deploy-commands.js --global           # Deploy all commands globally
-  node deploy-commands.js --command ping     # Deploy only the 'ping' command to guild
-  node deploy-commands.js --global --command ping  # Deploy only the 'ping' command globally
+  node deploycommands.js                    # Deploy all commands (including local) to guild
+  node deploycommands.js --global           # Deploy all commands (including local) globally
+  node deploycommands.js --command ping     # Deploy only the 'ping' command to guild
+  node deploycommands.js --command test     # Deploy only the local 'test' command to guild
+  node deploycommands.js --global --command ping  # Deploy only the 'ping' command globally
+
+Local Command Support:
+  This script automatically scans and deploys local commands from commands/local/
+  Local commands are organized by module (e.g., commands/local/utility/test.js)
 
 Environment Variables Required:
   CLIENT_ID      - Your Discord application/bot client ID

@@ -19,10 +19,12 @@ const __dirname = path.dirname(__filename);
 let configPath;
 try {
     configPath = path.join(__dirname, '../../config.local.json');
-    configPath = configPath.default;
+    // Check if local config exists, otherwise use default
+    if (!fs.existsSync(configPath)) {
+        throw new Error('Local config not found');
+    }
 } catch (e) {
     configPath = path.join(__dirname, '../../config.json');
-    configPath = configPath.default;
 }
 
 function saveConfig() {
@@ -64,7 +66,14 @@ export function getModuleByName(name) {
 
 export function getCommandsByModule(moduleName) {
     return Object.entries(config.commands)
-        .filter(([_, command]) => command.module === moduleName)
+        .filter(([_, command]) => {
+            // Handle both old boolean format and new object format
+            if (typeof command === 'object') {
+                return command.module === moduleName;
+            }
+            // For backward compatibility with old boolean format
+            return false;
+        })
         .map(([name, command]) => ({ name, ...command }));
 }
 
@@ -77,31 +86,62 @@ export async function deployModule(moduleName, globally = false) {
     console.log(`[INFO] Deploying module: ${moduleName}`);
     const foldersPath = path.join(__dirname, '../commands');
     const commandFolders = fs.readdirSync(foldersPath);
-    const commandFolder = commandFolders.find(folder => folder === moduleName);
-    if (!commandFolder) {
-        throw new Error(`[ERROR] Command folder for module "${moduleName}" not found.`);
-    }
-    const commandsPath = path.join(foldersPath, commandFolder);
-    const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
-
+    
     let results = [];
     let errors = [];
 
-    for (const file of commandFiles) {
-        const filePath = path.join(commandsPath, file);
-        const fileURL = pathToFileURL(filePath).href;
-        const command = await import(fileURL);
+    // Check regular module commands
+    const commandFolder = commandFolders.find(folder => folder === moduleName);
+    if (commandFolder) {
+        const commandsPath = path.join(foldersPath, commandFolder);
+        const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 
-        if ('data' in command.default && 'execute' in command.default) {
-            try {
-                const result = await Commands.deployCommand(command.default.data.name, globally);
-                results.push(result);
-            } catch (err) {
-                errors.push(`[${file}]: ${err.message}`);
+        for (const file of commandFiles) {
+            const filePath = path.join(commandsPath, file);
+            const fileURL = pathToFileURL(filePath).href;
+            const command = await import(fileURL);
+
+            if ('data' in command.default && 'execute' in command.default) {
+                try {
+                    const result = await Commands.deployCommand(command.default.data.name, globally);
+                    results.push(result);
+                } catch (err) {
+                    errors.push(`[${file}]: ${err.message}`);
+                }
+            } else {
+                errors.push(`[${file}]: Missing "data" or "execute" property.`);
             }
-        } else {
-            errors.push(`[${file}]: Missing "data" or "execute" property.`);
         }
+    }
+
+    // Check local commands for this module
+    const localPath = path.join(foldersPath, 'local');
+    if (fs.existsSync(localPath)) {
+        const localModulePath = path.join(localPath, moduleName);
+        if (fs.existsSync(localModulePath) && fs.statSync(localModulePath).isDirectory()) {
+            const localCommandFiles = fs.readdirSync(localModulePath).filter(file => file.endsWith('.js'));
+
+            for (const file of localCommandFiles) {
+                const filePath = path.join(localModulePath, file);
+                const fileURL = pathToFileURL(filePath).href;
+                const command = await import(fileURL);
+
+                if ('data' in command.default && 'execute' in command.default) {
+                    try {
+                        const result = await Commands.deployCommand(command.default.data.name, globally);
+                        results.push(result);
+                    } catch (err) {
+                        errors.push(`[local/${file}]: ${err.message}`);
+                    }
+                } else {
+                    errors.push(`[local/${file}]: Missing "data" or "execute" property.`);
+                }
+            }
+        }
+    }
+
+    if (results.length === 0 && errors.length === 0) {
+        return `[INFO] No commands found for module "${moduleName}".`;
     }
 
     if (errors.length > 0) {
@@ -120,31 +160,62 @@ export async function reloadModule(moduleName, interaction) {
     console.log(`[INFO] Reloading module: ${moduleName}`);
     const foldersPath = path.join(__dirname, '../commands');
     const commandFolders = fs.readdirSync(foldersPath);
-    const commandFolder = commandFolders.find(folder => folder === moduleName);
-    if (!commandFolder) {
-        throw new Error(`[ERROR] Command folder for module "${moduleName}" not found.`);
-    }
-    const commandsPath = path.join(foldersPath, commandFolder);
-    const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
-
+    
     let results = [];
     let errors = [];
 
-    for (const file of commandFiles) {
-        const filePath = path.join(commandsPath, file);
-        const fileURL = pathToFileURL(filePath).href;
-        const command = await import(fileURL);
+    // Check regular module commands
+    const commandFolder = commandFolders.find(folder => folder === moduleName);
+    if (commandFolder) {
+        const commandsPath = path.join(foldersPath, commandFolder);
+        const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 
-        if ('data' in command.default && 'execute' in command.default) {
-            try {
-                const result = await Commands.reloadCommand(command.default.data.name, interaction);
-                results.push(result);
-            } catch (err) {
-                errors.push(`[${file}]: ${err.message}`);
+        for (const file of commandFiles) {
+            const filePath = path.join(commandsPath, file);
+            const fileURL = pathToFileURL(filePath).href;
+            const command = await import(fileURL);
+
+            if ('data' in command.default && 'execute' in command.default) {
+                try {
+                    const result = await Commands.reloadCommand(command.default.data.name, interaction);
+                    results.push(result);
+                } catch (err) {
+                    errors.push(`[${file}]: ${err.message}`);
+                }
+            } else {
+                errors.push(`[${file}]: Missing "data" or "execute" property.`);
             }
-        } else {
-            errors.push(`[${file}]: Missing "data" or "execute" property.`);
         }
+    }
+
+    // Check local commands for this module
+    const localPath = path.join(foldersPath, 'local');
+    if (fs.existsSync(localPath)) {
+        const localModulePath = path.join(localPath, moduleName);
+        if (fs.existsSync(localModulePath) && fs.statSync(localModulePath).isDirectory()) {
+            const localCommandFiles = fs.readdirSync(localModulePath).filter(file => file.endsWith('.js'));
+
+            for (const file of localCommandFiles) {
+                const filePath = path.join(localModulePath, file);
+                const fileURL = pathToFileURL(filePath).href;
+                const command = await import(fileURL);
+
+                if ('data' in command.default && 'execute' in command.default) {
+                    try {
+                        const result = await Commands.reloadCommand(command.default.data.name, interaction);
+                        results.push(result);
+                    } catch (err) {
+                        errors.push(`[local/${file}]: ${err.message}`);
+                    }
+                } else {
+                    errors.push(`[local/${file}]: Missing "data" or "execute" property.`);
+                }
+            }
+        }
+    }
+
+    if (results.length === 0 && errors.length === 0) {
+        return `[INFO] No commands found for module "${moduleName}".`;
     }
 
     if (errors.length > 0) {

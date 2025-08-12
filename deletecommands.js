@@ -7,6 +7,13 @@
 
 import { REST, Routes } from 'discord.js';
 import dotenv from 'dotenv';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+
+// Fix __dirname for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Load environment variables from .env file
 dotenv.config();
@@ -17,6 +24,7 @@ const token = process.env.DISCORD_TOKEN;
 // Parse command line arguments
 const args = process.argv.slice(2);
 const isGlobal = args.includes('--global');
+const showLocal = args.includes('--list-local');
 const commandIndex = args.indexOf('--command');
 const commandIdIndex = args.indexOf('--id');
 const commandName = commandIndex !== -1 && args[commandIndex + 1] ? args[commandIndex + 1] : null;
@@ -40,6 +48,58 @@ if (commandName && commandId) {
 }
 
 const rest = new REST().setToken(token);
+
+// Function to list local commands
+async function listLocalCommands() {
+    console.log('[INFO] Scanning for local commands...\n');
+    
+    const localPath = path.join(__dirname, 'commands', 'local');
+    if (!fs.existsSync(localPath)) {
+        console.log('[INFO] No local commands directory found.');
+        return;
+    }
+    
+    const subdirs = fs.readdirSync(localPath);
+    let foundCommands = false;
+    
+    for (const subdir of subdirs) {
+        const subDirPath = path.join(localPath, subdir);
+        if (fs.statSync(subDirPath).isDirectory()) {
+            const commandFiles = fs
+                .readdirSync(subDirPath)
+                .filter(file => file.endsWith('.js'));
+            
+            if (commandFiles.length > 0) {
+                console.log(`📁 Module: ${subdir}`);
+                foundCommands = true;
+                
+                for (const file of commandFiles) {
+                    const filePath = path.join(subDirPath, file);
+                    
+                    try {
+                        const fileURL = pathToFileURL(filePath).href;
+                        const command = await import(fileURL);
+                        
+                        if ('data' in command.default && 'execute' in command.default) {
+                            console.log(`  - ${command.default.data.name} (${file})`);
+                        } else {
+                            console.log(`  - ${file} (invalid - missing data or execute)`);
+                        }
+                    } catch (error) {
+                        console.log(`  - ${file} (error loading: ${error.message})`);
+                    }
+                }
+                console.log('');
+            }
+        }
+    }
+    
+    if (!foundCommands) {
+        console.log('[INFO] No local commands found.');
+    }
+    
+    console.log('[INFO] Note: Use "node deploycommands.js" to deploy these local commands before they can be deleted.');
+}
 
 async function deleteCommands() {
     try {
@@ -74,7 +134,15 @@ async function deleteCommands() {
 
                 if (!commandToDelete) {
                     console.error(`[ERROR] Command "${commandName}" not found.`);
-                    console.log('[INFO] Available commands:', existingCommands.map(cmd => `${cmd.name} (ID: ${cmd.id})`).join(', '));
+                    
+                    // Enhanced listing to show command types
+                    console.log('[INFO] Available commands:');
+                    for (const cmd of existingCommands) {
+                        console.log(`  - ${cmd.name} (ID: ${cmd.id})`);
+                    }
+                    
+                    // Try to provide helpful suggestion about local commands
+                    console.log('[INFO] Note: If this is a local command, make sure it has been deployed first using deploycommands.js');
                     process.exit(1);
                 }
 
@@ -127,6 +195,7 @@ Options:
   --global              Delete commands globally
   --command <name>      Delete only a specific command by name
   --id <commandId>      Delete only a specific command by ID
+  --list-local          List all local commands available in the filesystem
 
 Examples:
   node deletecommands.js                           # Delete all guild commands
@@ -135,6 +204,7 @@ Examples:
   node deletecommands.js --id 1234567890123456789  # Delete command by ID from guild
   node deletecommands.js --global --command ping   # Delete only the 'ping' command globally
   node deletecommands.js --global --id 1234567890123456789  # Delete command by ID globally
+  node deletecommands.js --list-local              # List all local commands in filesystem
 
 Environment Variables Required:
   CLIENT_ID      - Your Discord application/bot client ID
@@ -149,5 +219,13 @@ if (args.includes('--help') || args.includes('-h')) {
     process.exit(0);
 }
 
-// Run the delete commands function
-deleteCommands();
+// Handle list local commands flag
+if (showLocal) {
+    listLocalCommands().then(() => process.exit(0)).catch(err => {
+        console.error('[ERROR] Error listing local commands:', err);
+        process.exit(1);
+    });
+} else {
+    // Run the delete commands function
+    deleteCommands();
+}

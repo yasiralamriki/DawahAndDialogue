@@ -122,11 +122,11 @@ export default {
 						try {
 							const result = Modules.enableModule(moduleName);
 
-							resultEmbed.setDescription(result);
-							await interaction.editReply({ embeds: [resultEmbed], ephemeral: true });
+							moduleEmbed.setDescription(result);
+							await interaction.editReply({ embeds: [moduleEmbed], ephemeral: true });
 						} catch (error) {
-							resultEmbed.setDescription(`[ERROR] Failed to enable module: **${moduleName}**\n${error.message}`);
-							await interaction.editReply({ embeds: [resultEmbed], ephemeral: true });
+							moduleEmbed.setDescription(`[ERROR] Failed to enable module: **${moduleName}**\n${error.message}`);
+							await interaction.editReply({ embeds: [moduleEmbed], ephemeral: true });
 						}
 					}
 				} else if (subcommand === 'disable') {
@@ -138,11 +138,11 @@ export default {
 						try {
 							const result = Modules.disableModule(moduleName);
 
-							resultEmbed.setDescription(result);
-							await interaction.editReply({ embeds: [resultEmbed], ephemeral: true });
+							moduleEmbed.setDescription(result);
+							await interaction.editReply({ embeds: [moduleEmbed], ephemeral: true });
 						} catch (error) {
-							resultEmbed.setDescription(`[ERROR] Failed to disable module: **${moduleName}**\n${error.message}`);
-							await interaction.editReply({ embeds: [resultEmbed], ephemeral: true });
+							moduleEmbed.setDescription(`[ERROR] Failed to disable module: **${moduleName}**\n${error.message}`);
+							await interaction.editReply({ embeds: [moduleEmbed], ephemeral: true });
 						}
 					}
 				}
@@ -156,7 +156,7 @@ export default {
 				const resultEmbed = new EmbedBuilder()
 					.setColor(config.colors.primary)
 					.setTitle('Module Deployment')
-					.setDescription(`Deploying module: **${moduleName}**`)
+					.setDescription(`Deploying module: **${moduleName}** (including local commands)`)
 					.setTimestamp()
 					.setFooter({ text: 'Salafi Bot', iconURL: interaction.client.user.displayAvatarURL() });
 
@@ -175,7 +175,7 @@ export default {
 				const reloadEmbed = new EmbedBuilder()
 					.setColor(config.colors.primary)
 					.setTitle('Module Reload')
-					.setDescription(`Reloading module: **${moduleName}**`)
+					.setDescription(`Reloading module: **${moduleName}** (including local commands)`)
 					.setTimestamp()
 					.setFooter({ text: 'Salafi Bot', iconURL: interaction.client.user.displayAvatarURL() });
 
@@ -207,11 +207,49 @@ export default {
 					const module = Modules.getModuleByName(moduleName);
 					const commands = Modules.getCommandsByModule(moduleName);
 
-					moduleInfoEmbed.addFields(
+					// Separate regular and local commands for better display
+					const regularCommands = [];
+					const localCommands = [];
+					
+					// Import fs module to check for local commands
+					const fs = await import('node:fs');
+					const localPath = path.resolve(__dirname, '../local', moduleName);
+					
+					for (const cmd of commands) {
+						let isLocal = false;
+						if (fs.existsSync(localPath)) {
+							const localFiles = fs.readdirSync(localPath).filter(file => file.endsWith('.js'));
+							const cmdFileName = `${cmd.name}.js`;
+							if (localFiles.includes(cmdFileName)) {
+								isLocal = true;
+								localCommands.push(cmd.name);
+							}
+						}
+						
+						if (!isLocal) {
+							regularCommands.push(cmd.name);
+						}
+					}
+
+					const fields = [
 						{ name: 'Name', value: module.name, inline: false },
 						{ name: 'Enabled', value: module.enabled ? 'Yes' : 'No', inline: false },
-						{ name: 'Commands', value: commands.length > 0 ? commands.map(cmd => cmd.name).join(', ') : 'No commands available', inline: false },
-					);
+						{ name: 'Total Commands', value: commands.length.toString(), inline: true },
+					];
+
+					if (regularCommands.length > 0) {
+						fields.push({ name: 'Regular Commands', value: regularCommands.join(', '), inline: false });
+					}
+
+					if (localCommands.length > 0) {
+						fields.push({ name: 'Local Commands', value: localCommands.join(', '), inline: false });
+					}
+
+					if (commands.length === 0) {
+						fields.push({ name: 'Commands', value: 'No commands available', inline: false });
+					}
+
+					moduleInfoEmbed.addFields(fields);
 					await interaction.editReply({ embeds: [moduleInfoEmbed], ephemeral: true });
 				} catch (error) {
 					console.error('[ERROR] Module info error:', error); // Add logging for debugging

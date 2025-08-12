@@ -207,19 +207,43 @@ export default {
 				try {
 					const command = Commands.getCommandByName(commandName);
 					
-					// Fix 1: Add better path handling and validation
-					const commandFilePath = path.resolve(__dirname, `../${command.module}/${command.name}.js`);
+					// Import fs module
+					const fs = await import('node:fs');
+					
+					let commandFilePath;
+					// First try to find it as a local command
+					const localPath = path.resolve(__dirname, '../local');
+					let found = false;
+					
+					if (fs.existsSync(localPath)) {
+						const subdirs = fs.readdirSync(localPath);
+						
+						for (const subdir of subdirs) {
+							const subDirPath = path.join(localPath, subdir);
+							if (fs.statSync(subDirPath).isDirectory()) {
+								const potentialPath = path.join(subDirPath, `${command.name}.js`);
+								if (fs.existsSync(potentialPath)) {
+									commandFilePath = potentialPath;
+									found = true;
+									break;
+								}
+							}
+						}
+					}
+					
+					if (!found) {
+						// For regular commands
+						commandFilePath = path.resolve(__dirname, `../${command.module}/${command.name}.js`);
+					}
 					
 					// Check if file exists before importing
-					const fs = await import('node:fs');
 					if (!fs.existsSync(commandFilePath)) {
 						throw new Error(`Command file not found at: ${commandFilePath}`);
 					}
 					
-					// Fix 2: Use proper URL construction for Windows
-					const fileURL = new URL(`file:///${commandFilePath.replace(/\\/g, '/')}`).href;
+					const { pathToFileURL } = await import('node:url');
+					const fileURL = pathToFileURL(commandFilePath).href;
 					
-					// Fix 3: Add cache busting to ensure fresh import
 					const commandModule = await import(`${fileURL}?t=${Date.now()}`);
 
 					commandInfoEmbed.addFields(

@@ -85,6 +85,60 @@ for (const folder of commandFolders) {
                 console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
             }
         }
+    } else {
+        const localCommandsPath = path.join(foldersPath, folder);
+        const localSubfolders = fs.readdirSync(localCommandsPath);
+        
+        for (const subfolder of localSubfolders) {
+            const subfolderPath = path.join(localCommandsPath, subfolder);
+            const stats = fs.statSync(subfolderPath);
+            
+            if (stats.isDirectory()) {
+                const localCommandFiles = fs.readdirSync(subfolderPath).filter(file => file.endsWith('.js'));
+
+                for (const file of localCommandFiles) {
+                    const filePath = path.join(subfolderPath, file);
+                    const fileURL = pathToFileURL(filePath).href; // Convert to file URL
+                    const command = await import(fileURL); // Use file URL for import
+
+                    if ('data' in command.default && 'execute' in command.default) {
+                        // Set the module property to the subfolder name (e.g., "utility")
+                        command.default.module = subfolder;
+
+                        // Update commands in config
+                        const existing = Commands.getCommandByName(command.default.data.name);
+                        if (!existing) {
+                            Commands.createCommand(command.default.data.name, subfolder);
+                            console.log(`[INFO] Created local command: ${command.default.data.name} in module: ${subfolder}`);
+                        } else {
+                            // If the module is different, update it in config
+                            if (existing.module !== subfolder) {
+                                const entry = Commands.getCommands()[command.default.data.name];
+                                if (typeof entry === 'object') {
+                                    entry.module = subfolder;
+                                }
+                                console.log(`[INFO] Updated module for local command: ${command.default.data.name} to ${subfolder}`);
+                            } else {
+                                console.log(`[INFO] Local command ${command.default.data.name} already exists in module: ${subfolder}, skipping creation.`);
+                            }
+                        }
+
+                        // Check if the module is enabled in the config
+                        const moduleObj = Modules.getModuleByName(subfolder);
+                        const commandObj = Commands.getCommandByName(command.default.data.name);
+
+                        if (moduleObj && moduleObj.enabled === true && commandObj && commandObj.enabled === true) {
+                            client.commands.set(command.default.data.name, command.default);
+                            console.log(`[INFO] Loaded local command: ${command.default.data.name} from module: ${subfolder}`);
+                        } else {
+                            console.log(`[INFO] ${moduleObj ? `Module ${subfolder} is not enabled` : `Module ${subfolder} does not exist`} : Local command ${command.default.data.name} is not enabled, skipping.`);
+                        }
+                    } else {
+                        console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+                    }
+                }
+            }
+        }
     }
 }
 
