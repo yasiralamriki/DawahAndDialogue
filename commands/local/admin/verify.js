@@ -1,5 +1,5 @@
 import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
-import config from '../../config.json' with { type: 'json' };
+import config from '../../../config.local.json' with { type: 'json' };
 
 const colors = config.colors[0];
 const roles = config.roles[0];
