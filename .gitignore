@@ -2,3 +2,5 @@ node_modules
 .env
 .DS_Store
 config.local.json
+commands/local/*
+events/*
