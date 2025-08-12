@@ -201,6 +201,13 @@ export async function reloadCommand(commandName, interaction) {
 			if (folder === 'local') {
 				// For local commands, iterate through subdirectories
 				const localPath = path.join(foldersPath, folder);
+				
+				// Check if local commands directory exists
+				if (!fs.existsSync(localPath)) {
+					console.log('[INFO] No local commands directory found, skipping local commands.');
+					continue;
+				}
+				
 				const subdirs = fs.readdirSync(localPath);
 				
 				for (const subdir of subdirs) {

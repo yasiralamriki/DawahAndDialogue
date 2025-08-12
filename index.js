@@ -160,19 +160,24 @@ for (const file of eventFiles) {
 }
 
 // Load local events
-const localEventFiles = fs.readdirSync(path.join(eventsPath, 'local')).filter(file => file.endsWith('.js'));
+const localEventsPath = path.join(eventsPath, 'local');
+if (fs.existsSync(localEventsPath)) {
+    const localEventFiles = fs.readdirSync(localEventsPath).filter(file => file.endsWith('.js'));
 
-for (const file of localEventFiles) {
-    const filePath = path.join(eventsPath, 'local', file);
-    const fileURL = pathToFileURL(filePath).href; // Convert to file URL
-    const event = await import(fileURL); // Use file URL for import
+    for (const file of localEventFiles) {
+        const filePath = path.join(localEventsPath, file);
+        const fileURL = pathToFileURL(filePath).href; // Convert to file URL
+        const event = await import(fileURL); // Use file URL for import
 
-    if (event.default.once) {
-        client.once(event.default.name, (...args) => event.default.execute(...args));
-    } else {
-        client.on(event.default.name, (...args) => event.default.execute(...args));
+        if (event.default.once) {
+            client.once(event.default.name, (...args) => event.default.execute(...args));
+        } else {
+            client.on(event.default.name, (...args) => event.default.execute(...args));
+        }
+        console.log(`[INFO] Loaded local event: ${event.default.name}`);
     }
-    console.log(`[INFO] Loaded local event: ${event.default.name}`);
+} else {
+    console.log(`[INFO] No local events directory found at ${localEventsPath}, skipping local event loading.`);
 }
 
 // Log in to Discord with your client's token

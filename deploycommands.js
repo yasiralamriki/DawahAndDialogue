@@ -61,6 +61,12 @@ async function deployCommands() {
 
             // Handle local commands differently
             if (folder === 'local') {
+                // Check if local commands directory exists
+                if (!fs.existsSync(commandsPath)) {
+                    console.log('[INFO] No local commands directory found, skipping local commands.');
+                    continue;
+                }
+                
                 // For local commands, iterate through subdirectories
                 const subdirs = fs.readdirSync(commandsPath);
                 for (const subdir of subdirs) {
