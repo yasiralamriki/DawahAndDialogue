@@ -53,22 +53,12 @@ for (const folder of commandFolders) {
                 // Always set the module property on the command object
                 command.default.module = folder;
 
-                // Update commands in config
-                const existing = Commands.getCommandByName(command.default.data.name);
-                if (!existing) {
-                    Commands.createCommand(command.default.data.name, folder);
+                // Create or update command in config (now handles duplicates gracefully)
+                const result = Commands.createCommand(command.default.data.name, folder);
+                if (result instanceof Commands.Command) {
                     console.log(`[INFO] Created command: ${command.default.data.name} in module: ${folder}`);
                 } else {
-                    // If the module is different, update it in config
-                    if (existing.module !== folder) {
-                        const entry = Commands.getCommands()[command.default.data.name];
-                        if (typeof entry === 'object') {
-                            entry.module = folder;
-                        }
-                        console.log(`[INFO] Updated module for command: ${command.default.data.name} to ${folder}`);
-                    } else {
-                        console.log(`[INFO] Command ${command.default.data.name} already exists in module: ${folder}, skipping creation.`);
-                    }
+                    console.log(`[INFO] Updated command: ${command.default.data.name} with module: ${folder}`);
                 }
 
                 // Check if the module is enabled in the config
@@ -105,22 +95,12 @@ for (const folder of commandFolders) {
                         // Set the module property to the subfolder name (e.g., "utility")
                         command.default.module = subfolder;
 
-                        // Update commands in config
-                        const existing = Commands.getCommandByName(command.default.data.name);
-                        if (!existing) {
-                            Commands.createCommand(command.default.data.name, subfolder);
+                        // Create or update command in config (now handles duplicates gracefully)
+                        const result = Commands.createCommand(command.default.data.name, subfolder);
+                        if (result instanceof Commands.Command) {
                             console.log(`[INFO] Created local command: ${command.default.data.name} in module: ${subfolder}`);
                         } else {
-                            // If the module is different, update it in config
-                            if (existing.module !== subfolder) {
-                                const entry = Commands.getCommands()[command.default.data.name];
-                                if (typeof entry === 'object') {
-                                    entry.module = subfolder;
-                                }
-                                console.log(`[INFO] Updated module for local command: ${command.default.data.name} to ${subfolder}`);
-                            } else {
-                                console.log(`[INFO] Local command ${command.default.data.name} already exists in module: ${subfolder}, skipping creation.`);
-                            }
+                            console.log(`[INFO] Updated local command: ${command.default.data.name} with module: ${subfolder}`);
                         }
 
                         // Check if the module is enabled in the config

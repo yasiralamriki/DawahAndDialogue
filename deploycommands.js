@@ -40,12 +40,11 @@ if (!isGlobal && !guildId) {
 }
 
 async function deployCommands() {
-    const commands = [];
+        const commands = [];
+        const commandNames = new Set(); // Track command names to handle duplicates
 
-    try {
-        console.log('[INFO] Loading commands...');
-
-        const foldersPath = path.join(__dirname, 'commands');
+        try {
+            console.log('[INFO] Loading commands...');        const foldersPath = path.join(__dirname, 'commands');
 
         if (!fs.existsSync(foldersPath)) {
             console.error('[ERROR] Commands directory not found at:', foldersPath);
@@ -88,8 +87,20 @@ async function deployCommands() {
                                         continue;
                                     }
 
+                                    const commandName = command.default.data.name;
+                                    if (commandNames.has(commandName)) {
+                                        console.log(`[WARN] Duplicate command "${commandName}" found in ${subdir}/${file}, overriding previous version`);
+                                        // Remove the previous version from commands array
+                                        const index = commands.findIndex(cmd => cmd.name === commandName);
+                                        if (index !== -1) {
+                                            commands.splice(index, 1);
+                                        }
+                                    } else {
+                                        commandNames.add(commandName);
+                                    }
+
                                     commands.push(command.default.data.toJSON());
-                                    console.log(`[INFO] Loaded local command: ${command.default.data.name} (from ${subdir})`);
+                                    console.log(`[INFO] Loaded local command: ${commandName} (from ${subdir})`);
                                 } else {
                                     console.warn(`[WARN] The local command at ${filePath} is missing a required "data" or "execute" property.`);
                                 }
@@ -117,8 +128,20 @@ async function deployCommands() {
                                 continue;
                             }
 
+                            const commandName = command.default.data.name;
+                            if (commandNames.has(commandName)) {
+                                console.log(`[WARN] Duplicate command "${commandName}" found in ${folder}/${file}, overriding previous version`);
+                                // Remove the previous version from commands array
+                                const index = commands.findIndex(cmd => cmd.name === commandName);
+                                if (index !== -1) {
+                                    commands.splice(index, 1);
+                                }
+                            } else {
+                                commandNames.add(commandName);
+                            }
+
                             commands.push(command.default.data.toJSON());
-                            console.log(`[INFO] Loaded command: ${command.default.data.name}`);
+                            console.log(`[INFO] Loaded command: ${commandName}`);
                         } else {
                             console.warn(`[WARN] The command at ${filePath} is missing a required "data" or "execute" property.`);
                         }

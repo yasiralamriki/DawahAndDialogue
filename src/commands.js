@@ -60,8 +60,13 @@ export class Command {
 }
 
 export function createCommand(commandName, moduleName) {
-    if (getCommandByName(commandName)) {
-        throw new Error(`[ERROR] Command "${commandName}" already exists.`);
+    const existingCommand = getCommandByName(commandName);
+    if (existingCommand) {
+        console.log(`[INFO] Command "${commandName}" already exists in module "${existingCommand.module}", overriding with module "${moduleName}"`);
+        // Update the existing command's module
+        config.commands[commandName] = { enabled: true, module: moduleName };
+        saveConfig();
+        return { name: commandName, module: moduleName, enabled: true };
     }
     return new Command(commandName, moduleName);
 }
@@ -95,6 +100,7 @@ export async function deployCommand(commandName, globally = false) {
 
     console.log(`[INFO] Deploying command: ${commandName}`);
     const commands = [];
+    const commandNames = new Set(); // Track command names to handle duplicates
     const foldersPath = path.join(__dirname, '../commands');
     const commandFolders = fs.readdirSync(foldersPath);
 
@@ -121,6 +127,19 @@ export async function deployCommand(commandName, globally = false) {
                             if (commandName && commandModule.default.data.name !== commandName) {
                                 continue;
                             }
+                            
+                            const cmdName = commandModule.default.data.name;
+                            if (commandNames.has(cmdName)) {
+                                console.log(`[WARN] Duplicate command "${cmdName}" found, overriding previous version`);
+                                // Remove the previous version from commands array
+                                const index = commands.findIndex(cmd => cmd.name === cmdName);
+                                if (index !== -1) {
+                                    commands.splice(index, 1);
+                                }
+                            } else {
+                                commandNames.add(cmdName);
+                            }
+                            
                             commands.push(commandModule.default.data.toJSON());
                         } else {
                             throw new Error(`[ERROR] The command at ${filePath} is missing a required "data" or "execute" property.`);
@@ -142,6 +161,19 @@ export async function deployCommand(commandName, globally = false) {
                     if (commandName && commandModule.default.data.name !== commandName) {
                         continue;
                     }
+                    
+                    const cmdName = commandModule.default.data.name;
+                    if (commandNames.has(cmdName)) {
+                        console.log(`[WARN] Duplicate command "${cmdName}" found, overriding previous version`);
+                        // Remove the previous version from commands array
+                        const index = commands.findIndex(cmd => cmd.name === cmdName);
+                        if (index !== -1) {
+                            commands.splice(index, 1);
+                        }
+                    } else {
+                        commandNames.add(cmdName);
+                    }
+                    
                     commands.push(commandModule.default.data.toJSON());
                 } else {
                     throw new Error(`[ERROR] The command at ${filePath} is missing a required "data" or "execute" property.`);
