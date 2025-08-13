@@ -5,7 +5,7 @@
     License: MIT
 */
 
-import { SlashCommandBuilder, EmbedBuilder } from 'discord.js'; // Import necessary classes from discord.js
+import { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } from 'discord.js'; // Import necessary classes from discord.js
 
 // Try to load local config, fallback to default config
 let config;
@@ -22,6 +22,11 @@ export default {
 		.setName('roles')
 		.setDescription('Gets the roles in the server'),
 	async execute(interaction) {
+		if (!interaction.member.permissionsIn(interaction.channel).has(PermissionFlagsBits.Administrator)) {
+			await interaction.editReply({ content: 'You are not authorized to use this command.', ephemeral: true });
+			return;
+		}
+
 		try {
 			const rolesList = interaction.guild.roles.cache
 				.sort((a, b) => b.position - a.position)
