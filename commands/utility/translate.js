@@ -6,7 +6,7 @@
 */
 
 import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
-import { GoogleGenAI  } from '@google/genai';
+import { GoogleGenAI, ListModelsResponse  } from '@google/genai';
 import dotenv from 'dotenv';
 
 // Try to load local config, fallback to default config
@@ -43,18 +43,18 @@ export default {
 				.setDescription('The model to use for translation')
 				.setRequired(false)
 				.addChoices(
-					{ name: 'Gemma 3n E2B', value: 'gemma-3n-e2b-it' },
-					{ name: 'Gemma 3n E4B', value: 'gemma-3n-e4b-it' },
-					{ name: 'Gemma 3 1B', value: 'gemma-3-1b-it' },
-					{ name: 'Gemma 3 4B', value: 'gemma-3-4b-it' },
-					{ name: 'Gemma 3 12B', value: 'gemma-3-12b-it' },
-					{ name: 'Gemma 3 27B', value: 'gemma-3-27b-it' },
+					{ name: 'Gemma 3 1B', value: 'models/gemma-3-1b-it' },
+					{ name: 'Gemma 3 4B', value: 'models/gemma-3-4b-it' },
+					{ name: 'Gemma 3 12B', value: 'models/gemma-3-12b-it' },
+					{ name: 'Gemma 3 27B', value: 'models/gemma-3-27b-it' },
+					{ name: 'Gemma 3n E4B', value: 'models/gemma-3n-e4b-it' },
+					{ name: 'Gemma 3n E2B', value: 'models/gemma-3n-e2b-it' }
 				)
 		),
 	async execute(interaction) {
 		const text = interaction.options.getString('text');
 		const language = interaction.options.getString('language');
-		const modelName = interaction.options.getString('model') || 'gemma-3-e2b-it';
+		const modelName = interaction.options.getString('model') || 'models/gemma-3-27b-it';
 
 		const translationEmbed = new EmbedBuilder()
 			.setAuthor({
