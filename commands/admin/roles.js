@@ -22,6 +22,11 @@ export default {
 		.setName('roles')
 		.setDescription('Gets the roles in the server'),
 	async execute(interaction) {
+		if (!interaction.member.permissionsIn(interaction.channel).has("ADMINISTRATOR")) {
+			await interaction.editReply({ content: 'You are not authorized to use this command.', ephemeral: true });
+			return;
+		}
+
 		try {
 			const rolesList = interaction.guild.roles.cache
 				.sort((a, b) => b.position - a.position)
