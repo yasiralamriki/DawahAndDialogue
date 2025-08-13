@@ -52,7 +52,7 @@ export default {
 			.setTitle(`Avatar of ${user.username}`)
 			.setImage(user.displayAvatarURL({ dynamic: true, size: imageSize }))
 			.setTimestamp()
-			.setFooter({ text: 'Salafi Bot', iconURL: interaction.client.user.displayAvatarURL() });
+			.setFooter({ text: interaction.client.user.username, iconURL: interaction.client.user.displayAvatarURL() });
 
 		// Reply to the interaction with the embed
 		await interaction.reply({ embeds: [avatarEmbed] });

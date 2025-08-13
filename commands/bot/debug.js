@@ -58,7 +58,7 @@ export default {
 			])
 			.setThumbnail(interaction.client.user.displayAvatarURL())
 			.setTimestamp()
-			.setFooter({ text: 'Salafi Bot', iconURL: interaction.client.user.displayAvatarURL() });
+			.setFooter({ text: interaction.client.user.username, iconURL: interaction.client.user.displayAvatarURL() });
 
 		// Reply to the interaction with the embed
 		await interaction.reply({ embeds: [debugEmbed] });

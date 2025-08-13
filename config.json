@@ -60,6 +60,10 @@
         "test": {
             "enabled": true,
             "module": "utility"
+        },
+        "roles": {
+            "enabled": true,
+            "module": "admin"
         }
     },
     "admins": [
