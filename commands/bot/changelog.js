@@ -41,7 +41,7 @@ export default {
             .setTitle(`Bot Changelog (Page ${pageCount})`)
             .setThumbnail(interaction.client.user.displayAvatarURL())
             .setTimestamp()
-            .setFooter({ text: 'Salafi Bot', iconURL: interaction.client.user.displayAvatarURL() });
+            .setFooter({ text: interaction.client.user.username, iconURL: interaction.client.user.displayAvatarURL() });
 
         // Add the 5 latest commits to the embed
         for (const commit of commits) {
@@ -68,7 +68,7 @@ export default {
         const row = new ActionRowBuilder()
 			.addComponents(nextPageButton);
 
-        changelogEmbed.setFooter({ text: 'Salafi Bot', iconURL: interaction.client.user.displayAvatarURL() });
+        changelogEmbed.setFooter({ text: interaction.client.user.username, iconURL: interaction.client.user.displayAvatarURL() });
 
         // Wait for button input
         const response = await interaction.reply({
@@ -104,7 +104,7 @@ export default {
                     .setTitle(`Bot Changelog (Page ${pageCount})`)
                     .setThumbnail(interaction.client.user.displayAvatarURL())
                     .setTimestamp()
-                    .setFooter({ text: 'Salafi Bot', iconURL: interaction.client.user.displayAvatarURL() });
+                    .setFooter({ text: interaction.client.user.username, iconURL: interaction.client.user.displayAvatarURL() });
 
                 // Add the new commits to the embed
                 for (const commit of nextCommits) {
@@ -155,7 +155,7 @@ export default {
                     .setTitle(`Bot Changelog (Page ${pageCount})`)
                     .setThumbnail(interaction.client.user.displayAvatarURL())
                     .setTimestamp()
-                    .setFooter({ text: 'Salafi Bot', iconURL: interaction.client.user.displayAvatarURL() });
+                    .setFooter({ text: interaction.client.user.username, iconURL: interaction.client.user.displayAvatarURL() });
 
                 // Add the new commits to the embed
                 for (const commit of nextCommits) {

@@ -99,7 +99,7 @@ export default {
 					.setTitle(`${subcommand === 'enable' ? 'Enable' : 'Disable'} Command: ${commandName}`)
 					.setDescription(`The command **${commandName}** does not exist. Please check the command name and try again.`)
 					.setTimestamp()
-					.setFooter({ text: 'Salafi Bot', iconURL: interaction.client.user.displayAvatarURL() });
+					.setFooter({ text: interaction.client.user.username, iconURL: interaction.client.user.displayAvatarURL() });
 
 				await interaction.editReply({ embeds: [errorEmbed], ephemeral: true });
 				return;
@@ -110,7 +110,7 @@ export default {
 					.setTitle(`${subcommand === 'enable' ? 'Enable' : 'Disable'} Command: ${commandName}`)
 					.setDescription(`You have requested to ${subcommand === 'enable' ? 'enable' : 'disable'} the command: **${commandName}**.`)
 					.setTimestamp()
-					.setFooter({ text: 'Salafi Bot', iconURL: interaction.client.user.displayAvatarURL() });
+					.setFooter({ text: interaction.client.user.username, iconURL: interaction.client.user.displayAvatarURL() });
 
 				commandEmbed.setDescription(`${subcommand === 'enable' ? 'Enabling' : 'Disabling'} the command: **${commandName}**.`);
 				if (subcommand === 'enable') {
@@ -158,7 +158,7 @@ export default {
 					.setTitle('Command Deployment')
 					.setDescription(`Deploying command: **${commandName}**`)
 					.setTimestamp()
-					.setFooter({ text: 'Salafi Bot', iconURL: interaction.client.user.displayAvatarURL() });
+					.setFooter({ text: interaction.client.user.username, iconURL: interaction.client.user.displayAvatarURL() });
 
 				// Call the deploy function
 				try {
@@ -177,7 +177,7 @@ export default {
 					.setTitle('Command Reload')
 					.setDescription(`Reloading command: **${commandName}**`)
 					.setTimestamp()
-					.setFooter({ text: 'Salafi Bot', iconURL: interaction.client.user.displayAvatarURL() });
+					.setFooter({ text: interaction.client.user.username, iconURL: interaction.client.user.displayAvatarURL() });
 
 				// Call the deploy function
 				try {
@@ -196,7 +196,7 @@ export default {
 				.setColor(config.colors.primary)
 				.setTitle(`Command Information: ${commandName}`)
 				.setTimestamp()
-				.setFooter({ text: 'Salafi Bot', iconURL: interaction.client.user.displayAvatarURL() });
+				.setFooter({ text: interaction.client.user.username, iconURL: interaction.client.user.displayAvatarURL() });
 
 			// Check if the command exists
 			if (Commands.getCommandByName(commandName) === null) {

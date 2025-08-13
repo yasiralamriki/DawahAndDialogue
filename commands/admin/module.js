@@ -99,7 +99,7 @@ export default {
 					.setTitle(`${subcommand === 'enable' ? 'Enable' : 'Disable'} Module: ${moduleName}`)
 					.setDescription(`The module **${moduleName}** does not exist. Please check the module name and try again.`)
 					.setTimestamp()
-					.setFooter({ text: 'Salafi Bot', iconURL: interaction.client.user.displayAvatarURL() });
+					.setFooter({ text: interaction.client.user.username, iconURL: interaction.client.user.displayAvatarURL() });
 
 				await interaction.editReply({ embeds: [errorEmbed], ephemeral: true });
 				return;
@@ -110,7 +110,7 @@ export default {
 					.setTitle(`${subcommand === 'enable' ? 'Enable' : 'Disable'} Module: ${moduleName}`)
 					.setDescription(`You have requested to ${subcommand === 'enable' ? 'enable' : 'disable'} the module: **${moduleName}**.`)
 					.setTimestamp()
-					.setFooter({ text: 'Salafi Bot', iconURL: interaction.client.user.displayAvatarURL() });
+					.setFooter({ text: interaction.client.user.username, iconURL: interaction.client.user.displayAvatarURL() });
 
 				moduleEmbed.setDescription(`${subcommand === 'enable' ? 'Enabling' : 'Disabling'} the module: **${moduleName}**.`);
 				if (subcommand === 'enable') {
@@ -158,7 +158,7 @@ export default {
 					.setTitle('Module Deployment')
 					.setDescription(`Deploying module: **${moduleName}** (including local commands)`)
 					.setTimestamp()
-					.setFooter({ text: 'Salafi Bot', iconURL: interaction.client.user.displayAvatarURL() });
+					.setFooter({ text: interaction.client.user.username, iconURL: interaction.client.user.displayAvatarURL() });
 
 				// Call the deploy function
 				try {
@@ -177,7 +177,7 @@ export default {
 					.setTitle('Module Reload')
 					.setDescription(`Reloading module: **${moduleName}** (including local commands)`)
 					.setTimestamp()
-					.setFooter({ text: 'Salafi Bot', iconURL: interaction.client.user.displayAvatarURL() });
+					.setFooter({ text: interaction.client.user.username, iconURL: interaction.client.user.displayAvatarURL() });
 
 				// Call the reload function
 				try {
@@ -196,7 +196,7 @@ export default {
 				.setColor(config.colors.primary)
 				.setTitle(`Module Information: ${moduleName}`)
 				.setTimestamp()
-				.setFooter({ text: 'Salafi Bot', iconURL: interaction.client.user.displayAvatarURL() });
+				.setFooter({ text: interaction.client.user.username, iconURL: interaction.client.user.displayAvatarURL() });
 
 			if (Modules.getModuleByName(moduleName) === null) {
 				moduleInfoEmbed.setDescription(`[ERROR] The module **${moduleName}** does not exist.`);

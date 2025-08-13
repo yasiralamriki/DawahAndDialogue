@@ -166,7 +166,7 @@ export default {
 					{ name: 'English', value: englishText || 'Not available.' },
 				)
 				.setTimestamp()
-				.setFooter({ text: 'Salafi Bot', iconURL: interaction.client.user.displayAvatarURL() });
+				.setFooter({ text: interaction.client.user.username, iconURL: interaction.client.user.displayAvatarURL() });
 
 			await interaction.editReply({ embeds: [quranEmbed] });
 		} catch (error) {
